@@ -1,3 +1,3 @@
 <?php 
-    echo 'Success!';
+    require('admin/settings.php');
 ?>
