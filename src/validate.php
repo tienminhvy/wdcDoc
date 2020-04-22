@@ -20,9 +20,6 @@
             } elseif (strlen($this->username) > 50) {
                 $GLOBALS['errUsername'] = 'Username must be less than 50 characters';
                 return false;
-            } elseif (!preg_match("/^[a-zA-Z0-9]*$/",$this->username)) {
-                $GLOBALS['errUsername'] = 'Username must only contain characters and numbers';
-                return false;
             } else {return true;}
         }
         

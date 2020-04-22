@@ -15,8 +15,8 @@
                     <p><label for='db_name'>Database name:</label> <input type='text' name='db_name'></p>
                     <p><label for='db_username'>Database username:</label> <input type='text' name='db_username' placeholder='root'></p>
                     <p><label for='db_password'>Database password:</label> <input type='password' name='db_password'></p>
-                    <button id='next' onclick='next()'>Next</button></form>";
-                    $js = "document.querySelector('#next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=2';form.submit();});";
+                    <button id='wdc_next' onclick='next()'>Next</button></form>";
+                    $js = "document.querySelector('#wdc_next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=2';form.submit();});";
                 break;
             }
         break;
@@ -48,9 +48,9 @@
                         <p><label for='db_name'>Database name:</label> <input type='text' name='db_name'></p>
                         <p><label for='db_username'>Database username:</label> <input type='text' name='db_username' placeholder='root'></p>
                         <p><label for='db_password'>Database password:</label> <input type='password' name='db_password'></p>
-                        <button id='next' onclick='next()'>Next</button></form>";
+                        <button id='wdc_next' onclick='next()'>Next</button></form>";
                         $html .= "<b style='line-height: 50px'>Database connection error!</b>";
-                        $js = "document.querySelector('#next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=2';form.submit();});";
+                        $js = "document.querySelector('#wdc_next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=2';form.submit();});";
                     } else { // If success, store them into $setting
                         $setting = "\n".'$db_server = '."'$db_server'".";\n".
                         '$db_name = '."'$db_name'".";\n".
@@ -70,8 +70,8 @@
                         <p><label for='admin_username'>Administrator username:</label> <input type='text' name='admin_username'></p>
                         <p><label for='admin_email'>Administrator email:</label> <input type='email' name='admin_email'></p>
                         <p><label for='admin_password'>Administrator password:</label> <input type='password' name='admin_password'></p>
-                        <button id='next'>Next</button></form>";
-                        $js = "document.querySelector('#next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=3';form.submit();});";
+                        <button id='wdc_next'>Next</button></form>";
+                        $js = "document.querySelector('#wdc_next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=3';form.submit();});";
                     }
                 break;
             }
@@ -161,8 +161,8 @@
                             <p><label for='admin_username'>Administrator username:</label> <input type='text' name='admin_username'><br>".$GLOBALS['errUsername']."</p>
                             <p><label for='admin_email'>Administrator email:</label> <input type='email' name='admin_email'><br>".$GLOBALS['errEmail']."</p>
                             <p><label for='admin_password'>Administrator password:</label> <input type='password' name='admin_password'><br>".$GLOBALS['errPassword']."</p>
-                            <button id='next'>Next</button></form>";
-                            $js = "document.querySelector('#next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=3';form.submit();});";
+                            <button id='wdc_next'>Next</button></form>";
+                            $js = "document.querySelector('#wdc_next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=3';form.submit();});";
                         }
 
                     }
@@ -183,8 +183,8 @@
                 <p>This script will help you to install the wdcDocs</p>
                 <p>What are you waiting for? Press Next to start the installation now.</p>
                 <p class='note'>This installation script only work well on PC/Laptop</p>
-                <button id='next'>Next</button>";
-                $js = "document.querySelector('#next').addEventListener('click', function (){window.location.assign('?step=1');});";
+                <button id='wdc_next'>Next</button>";
+                $js = "document.querySelector('#wdc_next').addEventListener('click', function (){window.location.assign('?step=1');});";
             break;
         }
     break;
@@ -221,7 +221,7 @@
             padding: 15px;
         }
         
-        #logo {
+        #wdc_logo {
             display: block;
             margin: 0 auto;
         }
@@ -253,7 +253,7 @@
             background-color: #920033;
         }
 
-        #next {
+        #wdc_next {
             float: right;
         }
 
@@ -287,7 +287,7 @@
         <h1 style="color: red">Please turn on javascript to continue!</h1>
     </noscript>
     <section>
-        <a href="wdcDocs.tld"><img src="media/img/wdc.png" alt="wdcDocs" id="logo"></a>
+        <a href="wdcDocs.tld"><img src="media/img/wdc.png" alt="wdcDocs" id="wdc_logo"></a>
         <h1>wdcDocsSoftware - Install</h1>
         <hr>
         <?php echo $html; ?>
