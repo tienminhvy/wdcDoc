@@ -1,5 +1,7 @@
 <?php 
     define('isSet', 1);
+    define('setting',1);
+    require_once(__DIR__.'/settings.php');
 ?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
 
@@ -38,8 +40,8 @@
                                     <div class="container-fluid">
                                         <div class="row">
                                             <div class="col-6">
-                                                <p><a href=""><i class="fi-cwsuxl-plus-solid"></i><span>Add a page</span></a></p>
-                                                <p><a href=""><i class="fi-swsuxl-pen"></i><span>Add a post</span></a></p>
+                                                <p><a href="<?php echo $site_addr.'/admin/create.php?request=create&type=page'?>"><i class="fi-cwsuxl-plus-solid"></i><span>Add a page</span></a></p>
+                                                <p><a href="<?php echo $site_addr.'/admin/create.php?request=create&type=post'?>"><i class="fi-swsuxl-pen"></i><span>Add a post</span></a></p>
                                                 <p><a href=""><i class="fi-cnsuxl-gavel"></i><span>Moderate comment section</span></a></p>
                                                 <p><a href=""><i class="fi-cnsuxl-question-mark"></i><span>Read Manual</span></a></p>
                                             </div>

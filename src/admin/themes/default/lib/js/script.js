@@ -38,4 +38,20 @@ $(function () {
             },150);
         }
     })
+    tinymce.init({
+        id: 'textarea',
+        selector: '#textarea',
+        height: 500,
+        menubar: false,
+        plugins: [
+        'advlist autolink lists link image charmap print preview anchor',
+        'searchreplace visualblocks code fullscreen',
+        'insertdatetime media table paste code help wordcount codesample'
+        ],
+        toolbar: 'undo redo | formatselect image link | ' +
+        'bold italic underline backcolor codesample | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat',
+        branding: false,
+    });
 });
