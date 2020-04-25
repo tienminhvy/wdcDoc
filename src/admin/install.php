@@ -1,14 +1,15 @@
 <?php 
     switch ($_GET['step']) {
-        case 1:
+        case 1: // bước 1
             define('setting', 1);
-            @require('settings.php');
+            @require('settings.php'); // gọi file setting
             switch ($installed) { // Check if user have been installed this software yet.
-                case true: // If true
-                    $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
+                case true: // Nếu script đã cài đặt rồi
+                    $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>'; // Thông báo khi đã cài đặt phần mềm
                     $js = '';
                     break;
                 default: // Else
+                    // Hiện bảng nhập phần cài đặt CSDL
                     $html = "<h2>Step 1: Enter database configuration</h2>
                     <form method='POST'>
                     <p><label for='db_hostname'>Database hostname:</label> <input type='text' name='db_hostname' value='localhost'> Port: <input type='number' name='db_port' value='3306' ></p>
@@ -20,16 +21,16 @@
                 break;
             }
         break;
-        case 2:
+        case 2: // bước 2
             define('setting', 1);
             @require('settings.php'); 
             switch ($installed) {
-                case true:
+                case true:// Nếu script đã cài đặt rồi
                     $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
                     $js = '';
                     break;
                 default:
-                    // Get the value from step 1
+                    // Lấy dữ liệu từ step 1
 
                     $db_server = $_POST['db_hostname'];
                     $db_name = $_POST['db_name'];
@@ -39,9 +40,9 @@
                     $site_addr = ($_SERVER['HTTPS']) ? 'https://':'http://' . $_SERVER['SERVER_NAME'].str_replace('/admin/install.php', '', $_SERVER['PHP_SELF']);
 
                     define('isSet', 1);
-                    require('db_connect.php');
-                    $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port);
-                    if ($db->checkDbConnection() == false) { // if connection error
+                    require('db_connect.php'); // php script cho csdl
+                    $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port); // tạo kết nối mới
+                    if ($db->checkDbConnection() == false) { // Nếu kết nối lỗi
                         $html = "<h2>Step 1: Enter database configuration</h2>
                         <form method='POST'>
                         <p><label for='db_hostname'>Database hostname:</label> <input type='text' name='db_hostname' value='localhost'> Port: <input type='number' name='db_port' value='3306' ></p>
@@ -51,7 +52,7 @@
                         <button id='wdc_next' onclick='next()'>Next</button></form>";
                         $html .= "<b style='line-height: 50px'>Database connection error!</b>";
                         $js = "document.querySelector('#wdc_next').addEventListener('click', function (){form = document.querySelector('form');form.action = '?step=2';form.submit();});";
-                    } else { // If success, store them into $setting
+                    } else { // Nếu kết nối thành công, lưu cài đặt vào file settings.php
                         $setting = "\n".'$db_server = '."'$db_server'".";\n".
                         '$db_name = '."'$db_name'".";\n".
                         '$db_username = '."'$db_username'".";\n".
@@ -59,10 +60,10 @@
                         '$db_port = '.$db_port.";\n".
                         '$site_addr = '."'$site_addr'".";";
 
-                        // Open settings.php and write settings.php
-
-                        $setting_f = fopen('settings.php', 'a');
-                        fwrite($setting_f, $setting);
+                        // Mở và ghi vào file settings.php
+                        // mở file
+                        $setting_f = fopen('settings.php', 'w');
+                        fwrite($setting_f, $setting); // ghi file
                         $html = "<h2>Step 2: Set the global configuration</h2>
                         <form method='POST'>
                         <p><label for='sitename'>Site name:</label> <input type='text' name='sitename' value='wdcDoc'></p>
@@ -76,31 +77,31 @@
                 break;
             }
         break;
-        case 3:
+        case 3: // bước 3
             define('setting', 1);
             @require('settings.php');
             switch ($installed) {
-                case true:
+                case true: // khi script đã được cài đặt
                     $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
                     $js = '';
-                    break;
-                default:
+                    break; 
+                default: // nếu ko
                     define('isSet', 1);
                     require('db_connect.php');
-                    require('../validate.php');
+                    require('../validate.php'); // kéo file xác nhận vào
                     $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port);
-                    if ($db->checkDbConnection() == false) { // if connection error
+                    if ($db->checkDbConnection() == false) { // nếu kết nối lỗi
                         $js = "window.location.assign('install.php');";
-                    } else {
+                    } else { // nếu ko
                         $sitename = $_POST['sitename'];
                         $site_email = $_POST['site_email'];
                         $admin_username = $_POST['admin_username'];
                         $admin_email = $_POST['admin_email'];
                         $admin_password = $_POST['admin_password'];
                         
-                        // Validating data from user
+                        // Xác nhận dữ liệu từ user
 
-                        function checkSiteName($sitename) {
+                        function checkSiteName($sitename) { // kiểm tra tên site
                             if ($sitename == '') {
                                 $GLOBALS['errSiteName'] = '<b>Site name must be fill out!</b>';
                                 return false;
@@ -113,7 +114,7 @@
                             } else {return true;}
                         }
                         
-                        function checkSiteEmail($site_email) {
+                        function checkSiteEmail($site_email) { // kiểm tra site email
                             if ($site_email == '') {
                                 $GLOBALS['errSiteEmail'] = '<b>Site email must be fill out!</b>';
                                 return false;
@@ -125,14 +126,15 @@
                                 return false;
                             } else {return true;}
                         }
-
+                        // tạo obj mới từ class userChecking
                         $adminUserChecking = new userChecking($admin_username, $admin_email,$admin_password);
 
                         if (checkSiteName($sitename) && checkSiteEmail($site_email) && $adminUserChecking->checkUsername() && $adminUserChecking->checkEmail() && $adminUserChecking->checkPassword()) {
-                            $setting = "\n".'$sitename = '."'$sitename';\n".
+                            $setting = "\n".'$sitename = '."'$sitename';\n". // lưu phần cài đặt vào file settings.php
                             '$site_email = '."'$site_email';";
                             $setting_f = fopen('settings.php', 'a');
                             fwrite($setting_f, $setting);
+                            // Tạo bảng
                             $db->createTable("CREATE TABLE users (
                                 id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                                 username varchar(50) NOT NULL UNIQUE,
@@ -141,7 +143,9 @@
                                 userrole varchar(20) NOT NULL,
                                 ins_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                             )");
+                            // các cột
                             $column = 'username, email, hash_password, userrole';
+                            // chèn dữ liệu vào bảng
                             $db->insertTable('users', $column, $admin_username, $admin_email,$adminUserChecking->getHashPW(), 'Administrator');
                             $html = "<h2>Finish</h2>
                             <p>Congraturation! The installation has been finished successfully!</p>
@@ -149,8 +153,8 @@
                             $setting = "\n".'$installed = true;';
                             $setting_f = fopen('settings.php', 'a');
                             fwrite($setting_f, $setting);
-                        } else {
-                            checkSiteName($sitename);
+                        } else { // nếu ko
+                            checkSiteName($sitename);// kt từ đầu.
                             checkSiteEmail($site_email);
                             $adminUserChecking->checkUsername();
                             $adminUserChecking->checkEmail();
@@ -174,12 +178,12 @@
         define('setting', 1);
         @require('settings.php');
         switch ($installed) {
-            case true:
+            case true: // nếu script đã cài rồi
                 $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
                 $js = '';
                 break;
             
-            default:
+            default: // nếu ko
                 $html = "<h1>Welcome to the most simple Document Software</h1>
                 <p>This script will help you to install the wdcDoc</p>
                 <p>What are you waiting for? Press Next to start the installation now.</p>
@@ -293,9 +297,6 @@
         <hr>
         <?php echo $html; ?>
     </section>
-    <?php 
-        // Your Code Here
-    ?>
     <script><?php echo $js ?></script>
 </body>
 </html>

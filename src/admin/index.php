@@ -1,7 +1,14 @@
 <?php 
+    session_start();
     define('isSet', 1);
     define('setting',1);
     require_once(__DIR__.'/settings.php');
+    if (!$_COOKIE['logged']) {
+        if (!$_SESSION['logged']) {
+            echo "<script>window.location.assign('$site_addr/login.php')</script>";
+            die('Not Logged');
+        }
+    }
     if (!isset($installed)) {
         $install_addr = ($_SERVER['HTTPS']) ? 'https://':'http://' . $_SERVER['SERVER_NAME'].str_replace('/index.php', '/install.php', $_SERVER['PHP_SELF']);
         die("You must run the installation file (install.php) at <a href='$install_addr'>$install_addr</a>");

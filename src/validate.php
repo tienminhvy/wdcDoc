@@ -6,14 +6,14 @@
     class userChecking
     {
         public function __construct($username, $email, $password)
-        {
+        { // hàm khởi tạo ban đầu
             $this->username = $username;
             $this->email = $email;
             $this->password = $password;
         }
         
         public function checkUsername()
-        {
+        { // kiểm tra username
             if ($this->username == '') {
                 $GLOBALS['errUsername'] = '<b>Username must be fill out!</b>';
                 return false;
@@ -24,7 +24,7 @@
         }
         
         public function checkEmail()
-        {
+        { // kiểm tra email
             if ($this->email == '') {
                 $GLOBALS['errEmail'] = '<b>Email must be fill out!</b>';
                 return false;
@@ -38,7 +38,7 @@
         }
 
         public function checkPassword()
-        {
+        { // kiểm tra mật khẩu
             if ($this->password == '') {
                 $GLOBALS['errPassword'] = '<b>Password must be fill out!</b>';
                 return false;
@@ -48,12 +48,12 @@
             } else {return true;}
         }
         private function __createHashPW()
-        {
+        { // tạo hash pw
             $hashed = password_hash($this->password, PASSWORD_BCRYPT);
             $this->hashed = $hashed;
         }
         public function getHashPW()
-        {
+        { // lấy hash pw
             $this->__createHashPW();
             return $this->hashed;
         }

@@ -4,6 +4,12 @@
     if (!isset($installed)) {
         die("You must run the installation file (install.php) in the admin directory in order to run this file.");
     }
+    if (!$_COOKIE['logged']) {
+        if (!$_SESSION['logged']) {
+            echo "<script>window.location.assign('$site_addr/login.php')</script>";
+            die('Not Logged');
+        }
+    }
 ?>
 <?php 
     define('isSet', 1);
