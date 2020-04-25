@@ -196,3 +196,10 @@ main {
     color: #707070;
 }
 
+#wdc_edate, #wdc_ehour,#wdc_emin {
+    width: 35px;
+}
+
+#wdc_eyear {
+    width: 55px;
+}

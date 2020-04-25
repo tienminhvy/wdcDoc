@@ -1,4 +1,11 @@
 <?php 
+    define('setting', 1);
+    require('settings.php');
+    if (!isset($installed)) {
+        die("You must run the installation file (install.php) in the admin directory in order to run this file.");
+    }
+?>
+<?php 
     define('isSet', 1);
 ?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
@@ -8,11 +15,44 @@
 <?php 
     $viewOrCreate = $_GET['request'];
     $typeRequest = $_GET['type'];
+$createOn = 
+"<h5>When</h5>
+<input type='number' name='date' id='wdc_edate'>
+<select name='month' id='wdc_emonth'>
+    <option value='1'>01 - Jan</option>
+    <option value='2'>02 - Feb</option>
+    <option value='3'>03 - Mar</option>
+    <option value='4'>04 - Apr</option>
+    <option value='5'>05 - May</option>
+    <option value='6'>06 - Jun</option>
+    <option value='7'>07 - Jul</option>
+    <option value='8'>08 - Aug</option>
+    <option value='9'>09 - Sep</option>
+    <option value='10'>10 - Oct</option>
+    <option value='11'>11 - Nov</option>
+    <option value='12'>12 - Dec</option>
+</select>
+<input type='number' name='year' id='wdc_eyear'>
+<span>at</span><input type='number' name='hour' id='wdc_ehour'><span>:</span><input type='number' name='minute' id='wdc_emin'>";
     $css = 
 "<style>
-.$viewOrCreate.$type > a {
+.$viewOrCreate.$typeRequest > a {
     background: black;
     color: rgb(231, 231, 231);
+}
+#wdc_admin_create > a{
+    background: black;
+}
+#wdc_admin_create > ul {
+    position: static !important;
+    top: 0 !important;
+    z-index: 1 !important;
+    background: #363636 !important;
+    width: 200px !important;
+    left: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: unset !important;
 }
 </style>";
     $invalidRequest =
@@ -35,6 +75,7 @@
                 <div class='card'>
                     <div class='card-body'>
                         <h5 class='card-title'>Configuration</h5>
+                        $createOn
                         <h5>Category</h5>
                         <div class='form-group'>
                             <select multiple class='form-control' name='' id=''>
@@ -68,6 +109,7 @@ $htmlCreatePage =
                 <div class='card'>
                     <div class='card-body'>
                         <h5 class='card-title'>Configuration</h5>
+                        $createOn
                         <span><button id='create' class='btn btn-info'>Create</button></span>
                     </div>
                 </div>
@@ -93,6 +135,7 @@ $htmlCreatePage =
             <div class='card'>
                 <div class='card-body'>
                     <h5 class='card-title'>Configuration</h5>
+                    $createOn
                     <span><button id='create' class='btn btn-info'>Create</button></span>
                 </div>
             </div>
@@ -143,4 +186,4 @@ $htmlCreatePage =
     }
 ?>
 
-<?php require_once(__DIR__.'/themes/default/footer.php'); ?>
+<?php require_once(__DIR__.'/themes/default/footer.php');echo $css; ?>

@@ -63,6 +63,26 @@
             }
         }
 
+        public function selectCol($table,...$columns) {
+            for ($i=0; $i < count($columns); $i++) { 
+                if ($i == count($columns)-1) {
+                    $colToVal .= ' '.$columns[$i];
+                }
+                $colToVal .= ' '.$columns[$i].', ';
+            }
+            return mysqli_query($this->conn, "SELECT $colToVal FROM $table");
+        }
+
+        public function selectValue($table, $condition,...$columns) {
+            for ($i=0; $i < count($columns); $i++) { 
+                if ($i == count($columns)-1) {
+                    $colToVal .= ' '.$columns[$i];
+                } else {$colToVal .= ' '.$columns[$i].', ';}
+            }
+            echo "SELECT $colToVal FROM $table WHERE $condition";
+            return mysqli_query($this->conn, "SELECT $colToVal FROM $table WHERE $condition");
+        }
+
         public function __destruct()
         {
             @mysqli_close($this->conn);
