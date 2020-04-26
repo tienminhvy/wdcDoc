@@ -1,16 +1,34 @@
 <?php 
+    session_start();
     define('setting', 1);
     require('settings.php');
     if (!isset($installed)) {
         die("You must run the installation file (install.php) in the admin directory in order to run this file.");
     }
-    if (!$_COOKIE['logged']) {
-        if (!$_SESSION['logged']) {
-            echo "<script>window.location.assign('$site_addr/login.php')</script>";
-            die('Not Logged');
+    if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
+        if (!$_COOKIE['logged']) {
+            header("Location: $site_addr/login.php",TRUE,303);
+            die('Not logged');
         }
     }
 ?>
+
+<?php 
+    // Process the user content:
+    if (isset($_POST['title'])) {
+        $title = $_POST['title'];
+        if (isset($_POST['content'])) {
+            // if (isset)
+            $content = $_POST['content'];
+        } else {
+            $error = 'You must fill out the content';
+        }
+    } else {
+        $error = 'You must fill out the title';
+    }
+    // $date = $_POST['title'];
+?>
+
 <?php 
     define('isSet', 1);
 ?>
@@ -23,7 +41,7 @@
     $typeRequest = $_GET['type'];
 $createOn = 
 "<h5>When</h5>
-<input type='number' name='date' id='wdc_edate'>
+<input type='number' name='date' id='wdc_edate' min='0' max='31'>
 <select name='month' id='wdc_emonth'>
     <option value='1'>01 - Jan</option>
     <option value='2'>02 - Feb</option>
@@ -38,8 +56,9 @@ $createOn =
     <option value='11'>11 - Nov</option>
     <option value='12'>12 - Dec</option>
 </select>
-<input type='number' name='year' id='wdc_eyear'>
-<span>at</span><input type='number' name='hour' id='wdc_ehour'><span>:</span><input type='number' name='minute' id='wdc_emin'>";
+<input type='number' name='year' id='wdc_eyear' min='0' max='9999'>
+<br />
+<span>at </span><input type='number' name='hour' id='wdc_ehour' min='0' max='23'><span>:</span><input type='number' name='minute' id='wdc_emin' min='0' max='59'><span>:</span><input type='number' name='second' id='wdc_esec' min='0' max='59'>";
     $css = 
 "<style>
 .$viewOrCreate.$typeRequest > a {
@@ -62,92 +81,101 @@ $createOn =
 }
 </style>";
     $invalidRequest =
-"<main>Invalid request, please try again!<main>";
+"<main><h1>Invalid request, please try again!</h1><main>";
     $htmlCreatePost = 
 "<main>
-    <div class='container'>
-        <div class='row'>
-            <div class='col'>
-                <h2>Add new post</h2>
-                <input type='text' class='form-control'>
-                <span>URL: </span>
+    <form method='POST'>
+        <div class='container'>
+            <div class='row'>
+                <div class='col'>
+                    <h2>Add new post</h2>
+                    <input type='text' class='form-control' name='title'>
+                    <input type='hidden' name='type' value='post'>
+                    <span>URL: </span>
+                </div>
             </div>
-        </div>
-        <div class='row'>
-            <div class='col-8'>
-                <textarea id='textarea'></textarea>
-            </div>
-            <div class='col-4'>
-                <div class='card'>
-                    <div class='card-body'>
-                        <h5 class='card-title'>Configuration</h5>
-                        $createOn
-                        <h5>Category</h5>
-                        <div class='form-group'>
-                            <select multiple class='form-control' name='' id=''>
-                                <option>Test1</option>
-                                <option>Test1</option>
-                                <option>Test1</option>
-                            </select>
+            <div class='row'>
+                <div class='col-8'>
+                    <textarea id='textarea' name='content'></textarea>
+                </div>
+                <div class='col-4'>
+                    <div class='card'>
+                        <div class='card-body'>
+                            <h5 class='card-title'>Configuration</h5>
+                            $createOn
+                            <h5>Category</h5>
+                            <div class='form-group'>
+                                <select multiple class='form-control' name='' id=''>
+                                    <option>Test1</option>
+                                    <option>Test1</option>
+                                    <option>Test1</option>
+                                </select>
+                            </div>
+                            <span><button id='create' class='btn btn-info'>Create</button></span>
                         </div>
-                        <span><button id='create' class='btn btn-info'>Create</button></span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </main>";
 $htmlCreatePage = 
 "<main>
-    <div class='container'>
-        <div class='row'>
-            <div class='col'>
-                <h2>Add new page</h2>
-                <input type='text' class='form-control'>
-                <span>URL: </span>
+    <form method='POST'>
+        <div class='container'>
+            <div class='row'>
+                <div class='col'>
+                    <h2>Add new page</h2>
+                    <input type='text' class='form-control' name='title'>
+                    <input type='hidden' name='type' value='page'>
+                    <span>URL: </span>
+                </div>
             </div>
-        </div>
-        <div class='row'>
-            <div class='col-8'>
-                <textarea id='textarea'></textarea>
-            </div>
-            <div class='col-4'>
-                <div class='card'>
-                    <div class='card-body'>
-                        <h5 class='card-title'>Configuration</h5>
-                        $createOn
-                        <span><button id='create' class='btn btn-info'>Create</button></span>
+            <div class='row'>
+                <div class='col-8'>
+                    <textarea id='textarea' name='content'></textarea>
+                </div>
+                <div class='col-4'>
+                    <div class='card'>
+                        <div class='card-body'>
+                            <h5 class='card-title'>Configuration</h5>
+                            $createOn
+                            <span><button id='create' class='btn btn-info'>Create</button></span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </main>";
     $htmlCreateCategory = 
 "<main>
-<div class='container'>
-    <div class='row'>
-        <div class='col'>
-            <h2>Add new category</h2>
-            <input type='text' class='form-control'>
-            <span>URL: </span>
-        </div>
-    </div>
-    <div class='row'>
-        <div class='col-8'>
-            <textarea id='textarea'></textarea>
-        </div>
-        <div class='col-4'>
-            <div class='card'>
-                <div class='card-body'>
-                    <h5 class='card-title'>Configuration</h5>
-                    $createOn
-                    <span><button id='create' class='btn btn-info'>Create</button></span>
+    <form method='POST'>
+        <div class='container'>
+            <div class='row'>
+                <div class='col'>
+                    <h2>Add new category</h2>
+                    <input type='text' class='form-control' name='title'>
+                    <input type='hidden' name='type' value='category'>
+                    <span>URL: </span>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-8'>
+                    <textarea id='textarea' name='content'></textarea>
+                </div>
+                <div class='col-4'>
+                    <div class='card'>
+                        <div class='card-body'>
+                            <h5 class='card-title'>Configuration</h5>
+                            $createOn
+                            <span><button id='create' class='btn btn-info'>Create</button></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </form>
 </main>";
     switch ($viewOrCreate) {
         case 'create':

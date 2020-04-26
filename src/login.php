@@ -1,5 +1,13 @@
 <?php 
     session_start(); // tạo session
+    if ($_SESSION['logged']||$_COOKIE['logged']) { // nếu đã đăng nhập thì chuyển hướng đến trang chủ
+        if ($_SESSION['userrole']=="Administrator"||$_COOKIE['userrole']=="Administrator") {
+            header("Location: admin/index.php",TRUE,303);
+        } else {
+            header("Location: index.php",TRUE,303);
+        }
+        die('Logged');
+    }
     define('setting', 1);
     define('isSet', 1);
     require('admin/settings.php');
@@ -14,10 +22,6 @@
     // nếu user đã nhập usernam vs password
     if (isset($username)&&isset($password)) {
         $loginCheck = new loginCheck($username, $password, $remember, $db);
-    }
-    if ($_SESSION['logged']||$_COOKIE['logged']) { // nếu đã đăng nhập thì chuyển hướng đến trang chủ
-        echo "<script>window.location.assign('.');</script>";
-        die('Logged');
     }
 ?>
 <script>
@@ -105,7 +109,7 @@
     <div class="container-fluid">
         <div class="row d-flex flex-row justify-content-center align-items-center">
             <div class="col-5" id="wdc_login-box">
-                <h2 class="text-center">Login to sitename</h2>
+                <h2 class="text-center">Login to <?php echo $sitename ?></h2>
                 <form method="POST" id="wdc_loginForm" action="">
                     <label for="wdc_iusername">Username:</label><input type="text" name="username" id="wdc_iusername" placeholder="Enter your username">
                     <label for="wdc_ipassword">Password:</label><input type="password" name="password" id="wdc_ipassword" placeholder="Enter your password">

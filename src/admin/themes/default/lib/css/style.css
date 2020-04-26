@@ -196,7 +196,7 @@ main {
     color: #707070;
 }
 
-#wdc_edate, #wdc_ehour,#wdc_emin {
+#wdc_edate, #wdc_ehour, #wdc_emin, #wdc_esec {
     width: 35px;
 }
 

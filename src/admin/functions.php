@@ -79,12 +79,18 @@ setTimeout(redirect,3000);
                 $this->isLogged = true; // trả về đăng nhập thành công
                 if ($this->isLogged) {
                     if ($this->remember == 'on') { // Lấy giá trị ghi nhớ tôi, nếu là on
-                        $_SESSION['logged'] = true; // set session và cookie
+                        // set cookie
                         setcookie('logged', true, time()+(86400*30),"/");
                         setcookie('username', $this->username, time()+(86400*30),"/");
-                    } else { 
+                        if ($result['userrole'] == "Administrator") {
+                            setcookie('userrole', $result['userrole'], time()+(86400*30),"/");
+                        }
+                    } else { // set session
                         $_SESSION['username'] = $this->username;
                         $_SESSION['logged'] = true;
+                        if ($result['userrole'] == "Administrator") {
+                            $_SESSION['userrole'] = $result['userrole'];
+                        }
                     }
                 }
                 if ($result['userrole'] == "Administrator") { // nếu vai trò là admin

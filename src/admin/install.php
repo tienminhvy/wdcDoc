@@ -143,10 +143,18 @@
                                 userrole varchar(20) NOT NULL,
                                 ins_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                             )");
+                            $db->createTable("CREATE TABLE posts (
+                                id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                                title VARCHAR(255) NOT NULL, 
+                                content LONGTEXT NOT NULL,
+                                date DATETIME NOT NULL,
+                                PRIMARY KEY (id)
+                            )");
                             // các cột
                             $column = 'username, email, hash_password, userrole';
                             // chèn dữ liệu vào bảng
                             $db->insertTable('users', $column, $admin_username, $admin_email,$adminUserChecking->getHashPW(), 'Administrator');
+                            $db->insertTable('post', 'title, content, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', '2020-04-26 00:00:00');
                             $html = "<h2>Finish</h2>
                             <p>Congraturation! The installation has been finished successfully!</p>
                             <p>Click the button to return to your homepage: <a href='.'><button>Homepage</button></a></p>";

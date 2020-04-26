@@ -12,7 +12,7 @@
                 </ul>
             </li>
             <li>
-                <a href="" class="wdc_activateSmenu1">Welcome, user!</a>
+                <a href="" class="wdc_activateSmenu1" id="adminInfo">Welcome, <?php echo (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'] ?></a>
                 <ul class="wdc_ad_smenu_1">
                     <li><a href="">Edit profile</a></li>
                     <li><a href="">Log out</a></li>

@@ -4,11 +4,19 @@
  * wdcDoc is a product own by weDevCode
  */
 $(function () {
+    // Gắn chữ thông báo
     $('main').append('<div id="notice">Thanks for using wdcDoc</div>');
+    // Lấy giá trị của menu
     let wdc_ad_nav2_width = $('#wdc_ad_nav2').width();
+    // Chiều dài màn hình
     let windowWidth = $(window).width();
     $('main').width(windowWidth-wdc_ad_nav2_width);
     $('#wdc_ad_nav2 ul li > a span').css('display', 'inline');
+    // hàm chuyển dạng Xpx sang X
+    function pxToInt(val) {
+        return parseInt(val.replace('px', ''));
+    }
+    $('#adminInfo ~ ul').width(pxToInt($('#adminInfo').css('paddingRight'))+pxToInt($('#adminInfo').css('paddingLeft'))+$('#adminInfo').width());
     let collapseCol = false;
     $('#wdc_collapseActivate').on('click', function (){
         switch (collapseCol) {

@@ -3,10 +3,10 @@
     define('isSet', 1);
     define('setting',1);
     require_once(__DIR__.'/settings.php');
-    if (!$_COOKIE['logged']) {
-        if (!$_SESSION['logged']) {
-            echo "<script>window.location.assign('$site_addr/login.php')</script>";
-            die('Not Logged');
+    if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
+        if (!$_COOKIE['logged']) {
+            header("Location: $site_addr/login.php",TRUE,303);
+            die('Not logged');
         }
     }
     if (!isset($installed)) {
