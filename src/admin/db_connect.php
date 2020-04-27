@@ -2,6 +2,7 @@
     if(!defined('isSet')){
         die('<h1>Direct access is not allowed!</h1>');
     }
+    define('setting',1);
     require('settings.php');
     class dataBase // tạo class
     {
@@ -18,7 +19,7 @@
 
         public function checkDbConnection() // kiểm tra kết nối
         {
-            if($this->conn) {return true;} else {return false;}
+            if(!$this->conn) {return false;} else {return true;}
         }
 
         public function createTable($table) // tạo bảng
@@ -88,5 +89,5 @@
             @mysqli_close($this->conn);
         }
     }
-    $db = new dataBase($db_server, $db_username, $db_password, $db_port);
+    $db = new dataBase($db_server, $db_name, $db_username, $db_password, $db_port);
 ?>

@@ -197,7 +197,7 @@ main {
 }
 
 #wdc_edate, #wdc_ehour, #wdc_emin, #wdc_esec {
-    width: 35px;
+    width: 36px;
 }
 
 #wdc_eyear {

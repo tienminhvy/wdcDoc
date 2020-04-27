@@ -1,5 +1,6 @@
 <?php 
     session_start();
+    define('isSet', 1);
     define('setting', 1);
     require('settings.php');
     if (!isset($installed)) {
@@ -11,15 +12,53 @@
             die('Not logged');
         }
     }
+    require('db_connect.php');
 ?>
 
 <?php 
+    date_default_timezone_set('Asia/Ho_Chi_Minh');
+    $viewOrCreate = $_GET['request'];
+    $typeRequest = $_GET['type'];
+    // Form Date()
+    $fdate = date('d');
+    $fmonth = date('m');
+    function selectMonth($m){
+        return "$('#wdc_emonth [value=$m]').attr('selected','selected')";
+    }
+    $fyear = date('Y');
+    $fhour = date('H');
+    $fminute = date('i');
+    $fsecond = date('s');
+
+    $fayear = $_POST['year'];
+    $famonth = $_POST['month'];
+    $fadate = $_POST['date'];
+    $fahour = $_POST['hour'];
+    $faminute = $_POST['minute'];
+    $fasecond = $_POST['second'];
+
+    if (isset($fayear)&&isset($famonth)&&isset($fadate)&&isset($fahour)&&isset($faminute)&&isset($fasecond)) {
+        $fullDate = "$fayear-$famonth-$fadate $fahour:$faminute:$fasecond";
+    } else {
+        $fullDate = null;
+    }
+    $dom = new DOMDocument();
     // Process the user content:
-    if (isset($_POST['title'])) {
-        $title = $_POST['title'];
+    if (isset($_POST['title'])) { // Nếu title đã được nhập
+        $title = $_POST['title']; // title
         if (isset($_POST['content'])) {
             // if (isset)
-            $content = $_POST['content'];
+            $content = $_POST['content']; // content
+            @$dom->loadHTML($content); // load dom
+            $script = $dom->getElementsByTagName('script'); // lấy tag script
+            $remove = []; // tạo arr $remove
+            foreach($script as $item){$remove[] = $item;} // lưu từng tag lấy được vào remove
+            foreach ($remove as $item){$item->parentNode->removeChild($item);} // lấy từng tag trong remove xoá child
+            $content = $dom->saveHTML(); // lưu
+            if (isset($fullDate)) {
+                $db->insertTable($typeRequest, 'title, content, date', $title, $content, $fullDate);
+                $notify = "<div class='alert alert-success' role='alert'>Your request have been done successfully!</div>";
+            }
         } else {
             $error = 'You must fill out the content';
         }
@@ -29,36 +68,31 @@
     // $date = $_POST['title'];
 ?>
 
-<?php 
-    define('isSet', 1);
-?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
 
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
 
 <?php 
-    $viewOrCreate = $_GET['request'];
-    $typeRequest = $_GET['type'];
 $createOn = 
 "<h5>When</h5>
-<input type='number' name='date' id='wdc_edate' min='0' max='31'>
+<input type='number' name='date' id='wdc_edate' min='0' max='31' value='$fdate'>
 <select name='month' id='wdc_emonth'>
-    <option value='1'>01 - Jan</option>
-    <option value='2'>02 - Feb</option>
-    <option value='3'>03 - Mar</option>
-    <option value='4'>04 - Apr</option>
-    <option value='5'>05 - May</option>
-    <option value='6'>06 - Jun</option>
-    <option value='7'>07 - Jul</option>
-    <option value='8'>08 - Aug</option>
-    <option value='9'>09 - Sep</option>
+    <option value='01'>01 - Jan</option>
+    <option value='02'>02 - Feb</option>
+    <option value='03'>03 - Mar</option>
+    <option value='04'>04 - Apr</option>
+    <option value='05'>05 - May</option>
+    <option value='06'>06 - Jun</option>
+    <option value='07'>07 - Jul</option>
+    <option value='08'>08 - Aug</option>
+    <option value='09'>09 - Sep</option>
     <option value='10'>10 - Oct</option>
     <option value='11'>11 - Nov</option>
     <option value='12'>12 - Dec</option>
 </select>
-<input type='number' name='year' id='wdc_eyear' min='0' max='9999'>
+<input type='number' name='year' id='wdc_eyear' min='0' max='9999' value='$fyear'>
 <br />
-<span>at </span><input type='number' name='hour' id='wdc_ehour' min='0' max='23'><span>:</span><input type='number' name='minute' id='wdc_emin' min='0' max='59'><span>:</span><input type='number' name='second' id='wdc_esec' min='0' max='59'>";
+<span>at </span><input type='number' name='hour' id='wdc_ehour' min='0' max='23' value='$fhour'><span>:</span><input type='number' name='minute' id='wdc_emin' min='0' max='59' value='$fminute'><span>:</span><input type='number' name='second' id='wdc_esec' min='0' max='59' value='$fsecond'>";
     $css = 
 "<style>
 .$viewOrCreate.$typeRequest > a {
@@ -80,6 +114,7 @@ $createOn =
     transition: unset !important;
 }
 </style>";
+    $js = '<script>'.selectMonth($fmonth).'</script>';
     $invalidRequest =
 "<main><h1>Invalid request, please try again!</h1><main>";
     $htmlCreatePost = 
@@ -88,6 +123,7 @@ $createOn =
         <div class='container'>
             <div class='row'>
                 <div class='col'>
+                    $notify
                     <h2>Add new post</h2>
                     <input type='text' class='form-control' name='title'>
                     <input type='hidden' name='type' value='post'>
@@ -125,6 +161,7 @@ $htmlCreatePage =
         <div class='container'>
             <div class='row'>
                 <div class='col'>
+                    $notify
                     <h2>Add new page</h2>
                     <input type='text' class='form-control' name='title'>
                     <input type='hidden' name='type' value='page'>
@@ -154,6 +191,7 @@ $htmlCreatePage =
         <div class='container'>
             <div class='row'>
                 <div class='col'>
+                    $notify
                     <h2>Add new category</h2>
                     <input type='text' class='form-control' name='title'>
                     <input type='hidden' name='type' value='category'>
@@ -180,15 +218,15 @@ $htmlCreatePage =
     switch ($viewOrCreate) {
         case 'create':
             switch ($typeRequest) {
-                case 'post':
-                    echo $css.$htmlCreatePost;
+                case 'posts':
+                    echo $htmlCreatePost;
                     break;
                 
-                case 'page':
-                    echo $css.$htmlCreatePage;
+                case 'pages':
+                    echo $htmlCreatePage;
                     break;
-                case 'category';
-                    echo $css.$htmlCreateCategory;
+                case 'categories';
+                    echo $htmlCreateCategory;
                     break;
                 default:
                 echo $invalidRequest;
@@ -198,15 +236,15 @@ $htmlCreatePage =
         
         case 'view':
             switch ($typeRequest) {
-                case 'post':
-                    echo $css.$htmlViewPosts;
+                case 'posts':
+                    echo $htmlViewPosts;
                     break;
                 
-                case 'page':
-                    echo $css.$htmlViewPages;
+                case 'pages':
+                    echo $htmlViewPages;
                     break;
-                case 'category';
-                    echo $css.$htmlViewCategories;
+                case 'categories';
+                    echo $htmlViewCategories;
                     break;
                 default:
                 echo $invalidRequest;
@@ -220,4 +258,4 @@ $htmlCreatePage =
     }
 ?>
 
-<?php require_once(__DIR__.'/themes/default/footer.php');echo $css; ?>
+<?php require_once(__DIR__.'/themes/default/footer.php');echo $css.$js?>
