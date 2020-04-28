@@ -1,6 +1,6 @@
 <?php 
     if (!defined('setting')) {
-        die('<h1>Direct access is not allowed!</h1>');
+        die('Direct access is not allowed!');
     }
     // Editing this file is for advanced user only
 $db_server = 'localhost';

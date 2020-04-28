@@ -92,7 +92,7 @@ span {
     padding: 0;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .2s ease, visibility .2s ease;
+    /* transition: opacity .2s ease, visibility .2s ease; */
 }
 .wdc_ad_smenu_1 > li > a {
     display: block;
@@ -148,7 +148,7 @@ span {
     left: 200px;
     opacity: 0;
     visibility: hidden;
-    transition: opacity .2s ease, visibility .2s ease;
+    /* transition: opacity .2s ease, visibility .2s ease; */
 }
 
 #wdc_ad_nav2 > ul > li:hover > ul {

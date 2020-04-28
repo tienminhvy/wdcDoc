@@ -3,6 +3,7 @@
     define('isSet', 1);
     define('setting',1);
     require_once(__DIR__.'/settings.php');
+    require(__DIR__.'/db_connect.php');
     if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
         if (!$_COOKIE['logged']) {
             header("Location: $site_addr/login.php",TRUE,303);
@@ -10,13 +11,25 @@
         }
     }
     if (!isset($installed)) {
-        $install_addr = ($_SERVER['HTTPS']) ? 'https://':'http://' . $_SERVER['SERVER_NAME'].str_replace('/index.php', '/install.php', $_SERVER['PHP_SELF']);
-        die("You must run the installation file (install.php) at <a href='$install_addr'>$install_addr</a>");
+        die("You must run the installation file (install.php) in this directory before continue!");
     }
 ?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
 
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
+
+<?php 
+    $poststotal = mysqli_fetch_assoc($db->selectCol('posts', 'COUNT(*)'));
+    $pagestotal;
+    $userstotal = mysqli_fetch_assoc($db->selectCol('users', 'COUNT(*)'));
+    $notifyToAdmin = mysqli_fetch_assoc($db->selectValue('settings', "name='notify'", 'value'));
+    $fnta_set = false;
+    if (isset($_POST['note'])) {
+        $fnotifyToAdmin = $_POST['note'];
+        $db->editValue('settings', "name='notify'", 'value', "'$fnotifyToAdmin'");
+        $fnta_set = true;
+    }
+?>
 <main>
     <div class="container">
         <div class="row">
@@ -31,16 +44,16 @@
                                     <table class="table">
                                         <tbody>
                                             <tr>
-                                                <th scope="row">Total Posts</th>
-                                                <td>Number</td>
+                                                <th scope="row">Total posts</th>
+                                                <td><?php echo $poststotal['COUNT(*)'] ?></td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Total Page</th>
-                                                <td>Number</td>
+                                                <td>N/A</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Total User</th>
-                                                <td>Number</td>
+                                                <td><?php echo $userstotal['COUNT(*)'] ?></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -51,8 +64,8 @@
                                     <div class="container-fluid">
                                         <div class="row">
                                             <div class="col-6">
-                                                <p><a href="<?php echo $site_addr.'/admin/create.php?request=create&type=pages'?>"><i class="fi-cwsuxl-plus-solid"></i><span>Add a page</span></a></p>
-                                                <p><a href="<?php echo $site_addr.'/admin/create.php?request=create&type=posts'?>"><i class="fi-swsuxl-pen"></i><span>Add a post</span></a></p>
+                                                <p><a href="<?php echo $site_addr.'/admin/operation.php?request=create&type=pages'?>"><i class="fi-cwsuxl-plus-solid"></i><span>Add a page</span></a></p>
+                                                <p><a href="<?php echo $site_addr.'/admin/operation.php?request=create&type=posts'?>"><i class="fi-swsuxl-pen"></i><span>Add a post</span></a></p>
                                                 <p><a href=""><i class="fi-cnsuxl-gavel"></i><span>Moderate comment section</span></a></p>
                                                 <p><a href=""><i class="fi-cnsuxl-question-mark"></i><span>Read Manual</span></a></p>
                                             </div>
@@ -71,8 +84,10 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Note for all users who can access this dashboard</h5>
-                        <textarea name="note" id="admin_note" style="width: 100%" rows="10"></textarea>
-                        <button style="width: 100%">Save</button>
+                        <form method='POST'>
+                            <textarea name="note" id="admin_note" style="width: 100%" rows="10" onchange="getURL();"><?php echo ($fnta_set) ? $fnotifyToAdmin : $notifyToAdmin['value'] ?></textarea>
+                            <button style="width: 100%">Save</button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -62,7 +62,7 @@
 
                         // Mở và ghi vào file settings.php
                         // mở file
-                        $setting_f = fopen('settings.php', 'w');
+                        $setting_f = fopen('settings.php', 'a');
                         fwrite($setting_f, $setting); // ghi file
                         $html = "<h2>Step 2: Set the global configuration</h2>
                         <form method='POST'>
@@ -145,16 +145,24 @@
                             )");
                             $db->createTable("CREATE TABLE posts (
                                 id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-                                title VARCHAR(255) NOT NULL, 
+                                title TEXT NOT NULL, 
                                 content LONGTEXT NOT NULL,
+                                author VARCHAR(50) NOT NULL,
                                 date DATETIME NOT NULL,
+                                PRIMARY KEY (id)
+                            )");
+                            $db->createTable("CREATE TABLE settings ( 
+                                id INT UNSIGNED NOT NULL AUTO_INCREMENT, 
+                                name TEXT NOT NULL, 
+                                value TEXT NOT NULL, 
                                 PRIMARY KEY (id)
                             )");
                             // các cột
                             $column = 'username, email, hash_password, userrole';
                             // chèn dữ liệu vào bảng
                             $db->insertTable('users', $column, $admin_username, $admin_email,$adminUserChecking->getHashPW(), 'Administrator');
-                            $db->insertTable('post', 'title, content, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', '2020-04-26 00:00:00');
+                            $db->insertTable('posts', 'title, content, author, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', 'wdcdoc', '2020-04-26 00:00:00');
+                            $db->insertTable('settings', 'name, value', 'notify', 'Welcome to the Administrator Dashboard, thanks for using wdcDoc!');
                             $html = "<h2>Finish</h2>
                             <p>Congraturation! The installation has been finished successfully!</p>
                             <p>Click the button to return to your homepage: <a href='.'><button>Homepage</button></a></p>";
@@ -300,7 +308,7 @@
         <h1 style="color: red">Please turn on javascript to continue!</h1>
     </noscript>
     <section>
-        <a href="wdcDoc.tld"><img src="https://lh3.googleusercontent.com/QogGg81N45SiakwFP_wKAFWTnkCl3AvCUOzDFkxJh4eHDccKLN3wCHRAdcPEDcNuVfCkDVWBTPFwEMrWm0Pp4ehEJqBYds_RK6WBltcies9fkz9nrHzf-qZJk2od4lkV2lHWeprooQ=s160-no" alt="wdcDoc" id="wdc_logo"></a>
+        <a href="wdcDoc.tld"><img src="https://tienminhvy.com/wp-content/uploads/2020/04/wdc.png" alt="wdcDoc" id="wdc_logo"></a>
         <h1>wdcDocSoftware - Install</h1>
         <hr>
         <?php echo $html; ?>

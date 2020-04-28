@@ -69,8 +69,7 @@
             for ($i=0; $i < count($columns); $i++) { 
                 if ($i == count($columns)-1) {
                     $colToVal .= ' '.$columns[$i];
-                }
-                $colToVal .= ' '.$columns[$i].', ';
+                } else {$colToVal .= ' '.$columns[$i].', ';}
             }
             return mysqli_query($this->conn, "SELECT $colToVal FROM $table");
         }
@@ -82,6 +81,14 @@
                 } else {$colToVal .= ' '.$columns[$i].', ';}
             }
             return mysqli_query($this->conn, "SELECT $colToVal FROM $table WHERE $condition");
+        }
+
+        public function editValue($table, $condition, $column, $value)
+        {
+            return mysqli_query($this->conn, 
+            "UPDATE $table
+            SET $column = $value
+            WHERE $condition;");
         }
 
         public function __destruct()
