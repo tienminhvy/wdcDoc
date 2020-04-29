@@ -85,7 +85,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Note for all users who can access this dashboard</h5>
                         <form method='POST'>
-                            <textarea name="note" id="admin_note" style="width: 100%" rows="10" onchange="getURL();"><?php echo ($fnta_set) ? $fnotifyToAdmin : $notifyToAdmin['value'] ?></textarea>
+                            <textarea name="note" id="admin_note" style="width: 100%" rows="10"><?php echo ($fnta_set) ? $fnotifyToAdmin : $notifyToAdmin['value'] ?></textarea>
                             <button style="width: 100%">Save</button>
                         </form>
                     </div>

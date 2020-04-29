@@ -148,6 +148,23 @@
                                 title TEXT NOT NULL, 
                                 content LONGTEXT NOT NULL,
                                 author VARCHAR(50) NOT NULL,
+                                category VARCHAR(50) NOT NULL,
+                                date DATETIME NOT NULL,
+                                PRIMARY KEY (id)
+                            )");
+                            $db->createTable("CREATE TABLE pages (
+                                id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                                title TEXT NOT NULL, 
+                                content LONGTEXT NOT NULL,
+                                author VARCHAR(50) NOT NULL,
+                                date DATETIME NOT NULL,
+                                PRIMARY KEY (id)
+                            )");
+                            $db->createTable("CREATE TABLE categories (
+                                id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                                title TEXT NOT NULL, 
+                                content LONGTEXT NOT NULL,
+                                author VARCHAR(50) NOT NULL,
                                 date DATETIME NOT NULL,
                                 PRIMARY KEY (id)
                             )");

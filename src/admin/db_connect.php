@@ -85,10 +85,7 @@
 
         public function editValue($table, $condition, $column, $value)
         {
-            return mysqli_query($this->conn, 
-            "UPDATE $table
-            SET $column = $value
-            WHERE $condition;");
+            return mysqli_query($this->conn, "UPDATE $table SET $column=$value WHERE $condition;");
         }
 
         public function __destruct()

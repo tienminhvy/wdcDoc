@@ -53,7 +53,7 @@ $(function () {
         menubar: false,
         plugins: [
         'advlist autolink lists link image charmap print preview anchor',
-        'searchreplace visualblocks code fullscreen',
+        'searchreplace visualblocks code',
         'insertdatetime media table paste code help wordcount codesample'
         ],
         toolbar: 'undo redo | formatselect image link | ' +
@@ -62,4 +62,7 @@ $(function () {
         'removeformat',
         branding: false,
     });
+    window.onbeforeunload = function (){
+        return;
+    }
 });

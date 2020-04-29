@@ -17,13 +17,13 @@
 
 <?php 
     date_default_timezone_set('Asia/Ho_Chi_Minh');
-    $viewOrCreate = $_GET['request'];
     $typeRequest = $_GET['type'];
+    $issubmit = $_GET['issubmit'];
     // Form Date()
     $fdate = date('d');
     $fmonth = date('m');
     function selectMonth($m){
-        return "$('#wdc_emonth [value=$m]').attr('selected','selected')";
+        return "$('#wdc_emonth [value=$m]').attr('selected','selected');";
     }
     $fyear = date('Y');
     $fhour = date('H');
@@ -44,28 +44,60 @@
     }
     $dom = new DOMDocument();
     // Process the user content:
-    if (isset($_POST['title'])) { // Nếu title đã được nhập
-        $title = $_POST['title']; // title
-        if (isset($_POST['content'])) {
-            // if (isset)
-            $content = $_POST['content']; // content
-            @$dom->loadHTML($content); // load dom
-            $script = $dom->getElementsByTagName('script'); // lấy tag script
-            $remove = []; // tạo arr $remove
-            foreach($script as $item){$remove[] = $item;} // lưu từng tag lấy được vào remove
-            foreach ($remove as $item){$item->parentNode->removeChild($item);} // lấy từng tag trong remove xoá child
-            $content = $dom->saveHTML(); // lưu
-            if (isset($fullDate)) {
-                $db->insertTable($typeRequest, 'title, content, date', $title, $content, $fullDate);
-                $notify = "<div class='alert alert-success' role='alert'>Your request have been done successfully!</div>";
+    function errorTemplate($error)
+    {
+        if (isset($error)) {
+            return "<div class='alert alert-danger' role='alert'>".$error."</div>";
+        }
+    }
+    function successTemplate($success)
+    {
+        if (isset($success)) {
+            return "<div class='alert alert-success' role='alert'>".$success."</div>";
+        }
+    }
+    if ($issubmit == 'yes') {
+        if (!$_POST['title']=='') { // Nếu title đã được nhập
+            $title = $_POST['title']; // title
+            if (!$_POST['content']=='') {
+                // if (isset)
+                $content = $_POST['content']; // content
+                @$dom->loadHTML($content); // load dom
+                $script = $dom->getElementsByTagName('script'); // lấy tag script
+                $remove = []; // tạo arr $remove
+                foreach($script as $item){$remove[] = $item;} // lưu từng tag lấy được vào remove
+                foreach ($remove as $item){$item->parentNode->removeChild($item);} // lấy từng tag trong remove xoá child
+                $content = $dom->saveHTML(); // lưu
+                if (isset($fullDate)) {
+                    // Gửi dữ liệu bài viết đến CSDL
+                    switch ($typeRequest) {
+                        case 'post':
+                            $db->insertTable('posts', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            break;
+                        
+                        case 'page':
+                            $db->insertTable('pages', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            break;
+
+                        case 'category':
+                            $db->insertTable('categories', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            break;
+                    }
+                    // Lấy giá trị mới đưa vào
+                    $success = "Create new $typeRequest success!";
+                    // $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol($typeRequest, "MAX(id)"));
+                    // header("Location: operation.php?request=edit&type=posts&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
+                } else {
+                    $error = 'You must fill out which time to create this!';
+                }
+            } else {
+                $error = 'You must fill out the content!';
             }
         } else {
-            $error = 'You must fill out the content';
+            $error = 'You must fill out the title!';
         }
-    } else {
-        $error = 'You must fill out the title';
     }
-    // $date = $_POST['title'];
+    $formAction = "create.php?type=$typeRequest&issubmit=yes";
 ?>
 
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
@@ -95,14 +127,14 @@ $createOn =
 <span>at </span><input type='number' name='hour' id='wdc_ehour' min='0' max='23' value='$fhour'><span>:</span><input type='number' name='minute' id='wdc_emin' min='0' max='59' value='$fminute'><span>:</span><input type='number' name='second' id='wdc_esec' min='0' max='59' value='$fsecond'>";
     $css = 
 "<style>
-.$viewOrCreate.$typeRequest > a {
+.create.$typeRequest > a {
     background: black;
     color: rgb(231, 231, 231);
 }
 #wdc_admin_create > a{
     background: black;
 }
-#wdc_admin_create > ul {
+.wdc_submenu_01 {
     position: static !important;
     top: 0 !important;
     z-index: 1 !important;
@@ -113,21 +145,59 @@ $createOn =
     visibility: visible !important;
     transition: unset !important;
 }
+.wdc_submenu_01_collapsed {
+    left: 45px !important;
+    opacity: 0;
+}
 </style>";
-    $js = '<script>'.selectMonth($fmonth).'</script>';
+    $js = '<script>'.selectMonth($fmonth);
+    if ($operationType == 'edit') {
+        switch ($typeRequest) {
+            case 'posts':
+                $js .= "$.post('url.php', {type: 'post', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
+                break;
+
+            case 'pages':
+                $js .= "$.post('url.php', {type: 'page', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
+                break;
+
+            case 'categories':
+                $js .= "$.post('url.php', {type: 'category', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
+                break;
+            
+            default:
+                break;
+        }
+    }
+    $js .= "let collapseCol = false;
+    $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
+    $('#wdc_collapseActivate').on('click', function (){
+        switch (collapseCol) {
+            case false:
+            $('#wdc_admin_create > ul').removeClass('wdc_submenu_01');
+            $('#wdc_admin_create > ul').addClass('wdc_submenu_01_collapsed');
+            collapseCol = true;
+            break;
+
+            default:
+            $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
+            $('#wdc_admin_create > ul').removeClass('wdc_submenu_01_collapsed');
+            collapseCol = false;
+        break;}
+    });
+    ";
+    $js .= '</script>';
     $invalidRequest =
 "<main><h1>Invalid request, please try again!</h1><main>";
     $htmlCreatePost = 
 "<main>
-    <form method='POST'>
+    <form method='POST' action='$formAction'>
         <div class='container'>
             <div class='row'>
                 <div class='col'>
-                    $notify
                     <h2>Add new post</h2>
-                    <input type='text' class='form-control' name='title'>
-                    <input type='hidden' name='type' value='post'>
-                    <span>URL: </span>
+                    ".successTemplate($success).errorTemplate($error)."
+                    <input type='text' class='form-control' name='title' value=''>
                 </div>
             </div>
             <div class='row'>
@@ -147,7 +217,7 @@ $createOn =
                                     <option>Test1</option>
                                 </select>
                             </div>
-                            <span><button id='create' class='btn btn-info'>Create</button></span>
+                            <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>
                 </div>
@@ -157,15 +227,13 @@ $createOn =
 </main>";
 $htmlCreatePage = 
 "<main>
-    <form method='POST'>
+    <form method='POST' action='$formAction'>
         <div class='container'>
             <div class='row'>
                 <div class='col'>
-                    $notify
                     <h2>Add new page</h2>
+                    ".successTemplate($success).errorTemplate($error)."
                     <input type='text' class='form-control' name='title'>
-                    <input type='hidden' name='type' value='page'>
-                    <span>URL: </span>
                 </div>
             </div>
             <div class='row'>
@@ -177,7 +245,7 @@ $htmlCreatePage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
-                            <span><button id='create' class='btn btn-info'>Create</button></span>
+                            <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>
                 </div>
@@ -187,15 +255,13 @@ $htmlCreatePage =
 </main>";
     $htmlCreateCategory = 
 "<main>
-    <form method='POST'>
+    <form method='POST' action='$formAction'>
         <div class='container'>
             <div class='row'>
                 <div class='col'>
-                    $notify
                     <h2>Add new category</h2>
+                    ".successTemplate($success).errorTemplate($error)."
                     <input type='text' class='form-control' name='title'>
-                    <input type='hidden' name='type' value='category'>
-                    <span>URL: </span>
                 </div>
             </div>
             <div class='row'>
@@ -207,7 +273,7 @@ $htmlCreatePage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
-                            <span><button id='create' class='btn btn-info'>Create</button></span>
+                            <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>
                 </div>
@@ -215,43 +281,18 @@ $htmlCreatePage =
         </div>
     </form>
 </main>";
-    switch ($viewOrCreate) {
-        case 'create':
-            switch ($typeRequest) {
-                case 'posts':
-                    echo $htmlCreatePost;
-                    break;
-                
-                case 'pages':
-                    echo $htmlCreatePage;
-                    break;
-                case 'categories';
-                    echo $htmlCreateCategory;
-                    break;
-                default:
-                echo $invalidRequest;
-                break;
-            }
+
+    switch ($typeRequest) {
+        case 'post':
+            echo $htmlCreatePost;
             break;
         
-        case 'view':
-            switch ($typeRequest) {
-                case 'posts':
-                    echo $htmlViewPosts;
-                    break;
-                
-                case 'pages':
-                    echo $htmlViewPages;
-                    break;
-                case 'categories';
-                    echo $htmlViewCategories;
-                    break;
-                default:
-                echo $invalidRequest;
-                break;
-            }
+        case 'page':
+            echo $htmlCreatePage;
             break;
-
+        case 'category';
+            echo $htmlCreateCategory;
+            break;
         default:
         echo $invalidRequest;
         break;
