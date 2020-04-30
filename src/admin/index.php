@@ -2,17 +2,13 @@
     session_start();
     define('isSet', 1);
     define('setting',1);
-    require_once(__DIR__.'/settings.php');
-    require(__DIR__.'/db_connect.php');
-    if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
-        if (!$_COOKIE['logged']) {
-            header("Location: $site_addr/login.php",TRUE,303);
-            die('Not logged');
-        }
-    }
+    require_once('settings.php');
+    require_once('db_connect.php');
     if (!isset($installed)) {
         die("You must run the installation file (install.php) in this directory before continue!");
     }
+    require_once('../loginCheck.php');
+    loginCheck($wdc_id, $wdc_token, $db);
 ?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
 

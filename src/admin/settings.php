@@ -3,6 +3,7 @@
         die('Direct access is not allowed!');
     }
     // Editing this file is for advanced user only
+    
 $db_server = 'localhost';
 $db_name = 'wdcdoc';
 $db_username = 'admin';

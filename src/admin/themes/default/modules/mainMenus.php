@@ -1,3 +1,8 @@
+<?php 
+    if(!defined('isSet')){
+        die('<h1>Direct access is not allowed!</h1>');
+    }
+?>
 <header>
     <nav id="wdc_ad_nav1">
         <ul>
@@ -12,7 +17,7 @@
                 </ul>
             </li>
             <li>
-                <a href="" class="wdc_activateSmenu1" id="adminInfo">Welcome, <?php echo (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'] ?></a>
+                <a href="" class="wdc_activateSmenu1" id="adminInfo">Welcome, <?php echo $username ?></a>
                 <ul class="wdc_ad_smenu_1">
                     <li><a href="">Edit profile</a></li>
                     <li><a href="<?php echo $site_addr.'/logout.php' ?>">Log out</a></li>

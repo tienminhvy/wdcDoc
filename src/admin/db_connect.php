@@ -2,8 +2,6 @@
     if(!defined('isSet')){
         die('<h1>Direct access is not allowed!</h1>');
     }
-    define('setting',1);
-    require('settings.php');
     class dataBase // tạo class
     {
         public function __construct($db_server, $db_name,$db_username, $db_password, $db_port = 3306) {
@@ -31,7 +29,7 @@
             }
         }
 
-        public function insertTable($tableName, $columns, ...$values)
+        public function insertTable($table, $columns, ...$values)
         {
             for ($i=0; $i < count($values); $i++) { 
                 if ($i == count($values)-1) {
@@ -58,7 +56,7 @@
 
             }
             $ins = @mysqli_query($this->conn, 
-            "INSERT INTO $tableName ($columns)
+            "INSERT INTO $table ($columns)
             VALUES ($valToIns)");
             if (!$ins){
                 echo 'Error: '.$ins.'<br>'.mysqli_error($this->conn);
@@ -86,6 +84,11 @@
         public function editValue($table, $condition, $column, $value)
         {
             return mysqli_query($this->conn, "UPDATE $table SET $column=$value WHERE $condition;");
+        }
+
+        public function deleteFromPost($table, $condition)
+        {
+            return mysqli_query($this->conn, "DELETE FROM $table WHERE $condition;");
         }
 
         public function __destruct()

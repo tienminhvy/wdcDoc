@@ -3,47 +3,64 @@
     define('isSet', 1);
     define('setting', 1);
     require('settings.php');
+    require('db_connect.php');
     if (!isset($installed)) {
         die("You must run the installation file (install.php) in the admin directory in order to run this file.");
     }
-    if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
-        if (!$_COOKIE['logged']) {
-            header("Location: $site_addr/login.php",TRUE,303);
-            die('Not logged');
-        }
-    }
-    require('db_connect.php');
+    // Kiểm tra đăng nhập
+    require_once('../loginCheck.php');
+    loginCheck($wdc_id, $wdc_token, $db);
 ?>
 
 <?php 
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $typeRequest = $_GET['type'];
+    // Nếu chuyển hướng từ create
+    if ($_GET['rdfrom']=='create') {
+        $success = "Create new $typeRequest successfully";
+    }
     $id = $_GET['id'];
     $issubmit = $_GET['issubmit'];
     // Form Date()
-    switch ($typeRequest) {
+    switch ($typeRequest) { // lấy dữ liệu từ db
         case 'post':
-            $dataFromDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'title', 'content', 'date'));
+            if ($db->selectValue('posts', "id=$id", 'title', 'content', 'date')!==false) {
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'title', 'content', 'date'));
+            } else {
+                $dataFromDb = null;
+            }
             break;
         case 'page':
-            $dataFromDb = mysqli_fetch_assoc($db->selectValue('pages', "id=$id", 'title', 'content', 'date'));
+            if ($db->selectValue('pages', "id=$id", 'title', 'content', 'date')!==false) {
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('pages', "id=$id", 'title', 'content', 'date'));
+            } else {
+                $dataFromDb = null;
+            }
             break;
         case 'category':
-            $dataFromDb = mysqli_fetch_assoc($db->selectValue('categories', "id=$id", 'title', 'content', 'date'));
+            if ($db->selectValue('categories', "id=$id", 'title', 'content', 'date')!==false) {
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('categories', "id=$id", 'title', 'content', 'date'));
+            } else {
+                $dataFromDb = null;
+            }
             break;
     }
-    $fdate = date('d', strtotime($dataFromDb['date']));
-    $fmonth = date('m', strtotime($dataFromDb['date']));
+    if ($dataFromDb!==null){ // nếu dữ liệu trả về ko là null
+        $fdate = date('d', strtotime($dataFromDb['date']));
+        $fmonth = date('m', strtotime($dataFromDb['date']));
+        $fyear = date('Y', strtotime($dataFromDb['date']));
+        $fhour = date('H', strtotime($dataFromDb['date']));
+        $fminute = date('i', strtotime($dataFromDb['date']));
+        $fsecond = date('s', strtotime($dataFromDb['date']));
+        $title = $dataFromDb['title'];
+        $content = $dataFromDb['content'];
+    } else { // nếu ko
+        $error = "Unexpected error, $typeRequest not found!";
+    }
+    
     function selectMonth($m){
         return "$('#wdc_emonth [value=$m]').attr('selected','selected');";
     }
-    $fyear = date('Y', strtotime($dataFromDb['date']));
-    $fhour = date('H', strtotime($dataFromDb['date']));
-    $fminute = date('i', strtotime($dataFromDb['date']));
-    $fsecond = date('s', strtotime($dataFromDb['date']));
-
-    $title = $dataFromDb['title'];
-    $content = $dataFromDb['content'];
 
     $fayear = $_POST['year'];
     $famonth = $_POST['month'];
@@ -211,6 +228,7 @@ $createOn =
                                 </select>
                             </div>
                             <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
+                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
                         </div>
                     </div>
                 </div>
@@ -239,6 +257,7 @@ $htmlEditPage =
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
                             <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
+                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
                         </div>
                     </div>
                 </div>
@@ -267,6 +286,7 @@ $htmlEditPage =
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
                             <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
+                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
                         </div>
                     </div>
                 </div>
@@ -275,7 +295,7 @@ $htmlEditPage =
     </form>
 </main>";
 
-    if (!$dataFromDb==null) {
+    if (!$dataFromDb==null) { // kiểm tra xem dữ liệu trả về có null ko
         switch ($typeRequest) {
             case 'post':
                 echo $htmlEditPost;
@@ -291,8 +311,8 @@ $htmlEditPage =
             echo $invalidRequest;
             break;
         }
-    } else {
-        echo $invalidRequest;
+    } else { // nếu là null
+        echo "<main>".errorTemplate($error)."</main>";
     }
 ?>
 

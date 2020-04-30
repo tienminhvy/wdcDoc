@@ -1,19 +1,17 @@
 <?php 
     session_start(); // tạo session
-    if ($_SESSION['logged']||$_COOKIE['logged']) { // nếu đã đăng nhập thì chuyển hướng đến trang chủ
-        if ($_SESSION['userrole']=="Administrator"||$_COOKIE['userrole']=="Administrator") {
-            header("Location: admin/index.php",TRUE,303);
-        } else {
-            header("Location: index.php",TRUE,303);
-        }
-        die('Logged');
-    }
     define('setting', 1);
     define('isSet', 1);
-    require('admin/settings.php');
+    require_once('admin/settings.php');
+    require_once('admin/db_connect.php');
     if (!isset($installed)) { // nếu chưa cài đặt
         die("You must run the installation file (install.php) in the admin directory in order to run this file.");
     }
+    // Logout check
+    $loginpage = true; // đây là trang đăng nhập
+    require_once('loginCheck.php'); // gọi trang login check
+    logoutCheck($wdc_id, $wdc_token, $db); // kiểm tra đăng xuất hay chưa
+
     require('admin/functions.php');
     // lấy giá trị từ user
     $username = $_POST['username'];

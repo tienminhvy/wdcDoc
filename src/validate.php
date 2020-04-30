@@ -47,15 +47,5 @@
                 return false;
             } else {return true;}
         }
-        private function __createHashPW()
-        { // tạo hash pw
-            $hashed = password_hash($this->password, PASSWORD_BCRYPT);
-            $this->hashed = $hashed;
-        }
-        public function getHashPW()
-        { // lấy hash pw
-            $this->__createHashPW();
-            return $this->hashed;
-        }
     }
 ?>

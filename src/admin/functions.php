@@ -2,11 +2,58 @@
     if(!defined('isSet')){
         die('<h1>Direct access is not allowed!</h1>');
     }
-    require('db_connect.php');
-    require('settings.php');
 ?>
 <?php 
     // User 
+    class userRegister
+    {
+        public function __construct($username, $email, $password, $role, $db) {
+            $this->username = $username;
+            $this->email = $email;
+            $this->password = $password;
+            $this->db = $db;
+            $this->role = $role;
+        }
+
+        private function __createCustomID()
+        {
+            return uniqid("wdcUser_", true);
+        }
+
+        private function __createNewHashPW()
+        {
+            return password_hash($this->password, PASSWORD_BCRYPT);
+        }
+
+        private function __createNewUser(){
+            $this->userID = $this->__createCustomID();
+            switch ($this->role) {
+                case 'admin':
+                    $this->db->insertTable('users_permision', 'wdc_id, username, admincp', $this->userID, $this->username, 'yes');
+                    break;
+                
+                default:
+                    $this->db->insertTable('users_permision', 'wdc_id, username, admincp', $this->userID, $this->username, 'no');
+                    break;
+            }
+            if(!$this->db->insertTable('users', 'wdc_id, username, email, hash_password', $this->userID, $this->username, $this->email, $this->__createNewHashPW())) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        public function status()
+        {
+            if (!$this->__createNewUser()) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+
     class loginCheck
     { 
 
@@ -70,30 +117,44 @@ setTimeout(redirect,3000);
                 return true;
             }
         }
+
+        private function __createToken()
+        {
+            return uniqid('wdcToken_', true);
+        }
+
+        public function getToken()
+        {
+            return $this->__createToken();
+        }
+
         // Kiểm tra điều kiện đăng nhập
         public function checkLogin()
         {   
             if ($this->usernameCheck($this->username)&&$this->passwordCheck($this->username, $this->password)) { // Nếu hai hàm trên đúng
-                $data = $this->db->selectValue('users', "username = '$this->username'",'userrole'); // lấy g.trị vai trò người dùng
-                $result = mysqli_fetch_assoc($data);
-                $this->isLogged = true; // trả về đăng nhập thành công
-                if ($this->isLogged) {
-                    if ($this->remember == 'on') { // Lấy giá trị ghi nhớ tôi, nếu là on
-                        // set cookie
-                        setcookie('logged', true, time()+(86400*30),"/");
-                        setcookie('username', $this->username, time()+(86400*30),"/");
-                        if ($result['userrole'] == "Administrator") {
-                            setcookie('userrole', $result['userrole'], time()+(86400*30),"/");
-                        }
-                    } else { // set session
-                        $_SESSION['username'] = $this->username;
-                        $_SESSION['logged'] = true;
-                        if ($result['userrole'] == "Administrator") {
-                            $_SESSION['userrole'] = $result['userrole'];
-                        }
-                    }
+                $dataFromDb = $this->db->selectValue('users_permision', "username = '$this->username'",'admincp'); // lấy g.trị vai trò người dùng
+                $permisionResult = mysqli_fetch_assoc($dataFromDb);
+                $token = $this->__createToken();
+                $dataFUDb = $this->db->selectValue('users', "username = '$this->username'", 'wdc_id');
+                $dataFTDb = $this->db->selectValue('users_token', "username = '$this->username'", 'COUNT(id)');
+                $valueFUDb = mysqli_fetch_assoc($dataFUDb);
+                $valueFTDb = mysqli_fetch_assoc($dataFTDb);
+                $wdc_id = $valueFUDb['wdc_id'];
+                if ($valueFTDb['COUNT(id)']>0) {
+                    $this->db->editValue('users_token', "username = '$this->username'", 'token', "'$token'");
+                } else {
+                    $this->db->insertTable('users_token', 'wdc_id, username, token', $wdc_id, $this->username, $token);
                 }
-                if ($result['userrole'] == "Administrator") { // nếu vai trò là admin
+                
+                if ($this->remember == 'on') { // Lấy giá trị ghi nhớ tôi, nếu là on
+                    // set cookie
+                    setcookie('wdcToken', $token, time()+(86400*30),"/");
+                    setcookie('wdc_id', $wdc_id, time()+(86400*30), '/');
+                } else { // set session
+                    $_SESSION['wdc_id'] = $wdc_id;
+                    $_SESSION['wdcToken'] = $token;
+                }
+                if ($permisionResult['admincp'] == 'yes') { // nếu vai trò là admin
                     return $this->notifyIfTrue_Admin;
                 } else {
                     return $this->notifyIfTrue;
@@ -104,6 +165,4 @@ setTimeout(redirect,3000);
             }
         }
     }
-    // tạo kết nối db mới
-    $db = new dataBase($db_server,$db_name,$db_username,$db_password);
 ?>

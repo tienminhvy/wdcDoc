@@ -2,11 +2,9 @@
     define('setting', 1);
     require('admin/settings.php');
     session_start(); // đăng xuất
-    $_COOKIE['logged'];
-    if ($_COOKIE['logged']) {
-        setcookie("logged", "", time()-3600,'/'); // xoá cookie
-        setcookie("userrole", "", time()-3600,'/');
-        setcookie("username", "", time()-3600,'/');
+    if (isset($_COOKIE['wdc_id'])||isset($_COOKIE['wdcToken'])) {
+        setcookie("wdc_id", "", time()-3600,'/'); // xoá cookie
+        setcookie("wdcToken", "", time()-3600,'/');
     } else {
         session_unset();
     }

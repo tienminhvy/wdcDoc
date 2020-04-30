@@ -1,8 +1,10 @@
 <?php 
+    define('setting', 1);
+    define('isSet', 1);
+    @require_once('settings.php'); // gọi file setting
+    require_once('db_connect.php'); // php script cho csdl
     switch ($_GET['step']) {
         case 1: // bước 1
-            define('setting', 1);
-            @require('settings.php'); // gọi file setting
             switch ($installed) { // Check if user have been installed this software yet.
                 case true: // Nếu script đã cài đặt rồi
                     $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>'; // Thông báo khi đã cài đặt phần mềm
@@ -22,8 +24,6 @@
             }
         break;
         case 2: // bước 2
-            define('setting', 1);
-            @require('settings.php'); 
             switch ($installed) {
                 case true:// Nếu script đã cài đặt rồi
                     $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
@@ -33,16 +33,17 @@
                     // Lấy dữ liệu từ step 1
 
                     $db_server = $_POST['db_hostname'];
-                    $db_name = $_POST['db_name'];
+                    if (!$_POST['db_name']=='') {
+                        $db_name = $_POST['db_name'];
+                    } else {
+                        $db_name = 'error';
+                    }
                     $db_username = $_POST['db_username'];
                     $db_password = $_POST['db_password'];
                     $db_port = $_POST['db_port'];
                     $site_addr = ($_SERVER['HTTPS']) ? 'https://':'http://' . $_SERVER['SERVER_NAME'].str_replace('/admin/install.php', '', $_SERVER['PHP_SELF']);
-
-                    define('isSet', 1);
-                    require('db_connect.php'); // php script cho csdl
                     $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port); // tạo kết nối mới
-                    if ($db->checkDbConnection() == false) { // Nếu kết nối lỗi
+                    if ($db->checkDbConnection() === false) { // Nếu kết nối lỗi
                         $html = "<h2>Step 1: Enter database configuration</h2>
                         <form method='POST'>
                         <p><label for='db_hostname'>Database hostname:</label> <input type='text' name='db_hostname' value='localhost'> Port: <input type='number' name='db_port' value='3306' ></p>
@@ -78,18 +79,14 @@
             }
         break;
         case 3: // bước 3
-            define('setting', 1);
-            @require('settings.php');
             switch ($installed) {
                 case true: // khi script đã được cài đặt
                     $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';
                     $js = '';
                     break; 
                 default: // nếu ko
-                    define('isSet', 1);
-                    require('db_connect.php');
                     require('../validate.php'); // kéo file xác nhận vào
-                    $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port);
+                    $db = new dataBase($db_server, $db_name,$db_username, $db_password, $db_port); // tạo kết nối mới
                     if ($db->checkDbConnection() == false) { // nếu kết nối lỗi
                         $js = "window.location.assign('install.php');";
                     } else { // nếu ko
@@ -98,7 +95,6 @@
                         $admin_username = $_POST['admin_username'];
                         $admin_email = $_POST['admin_email'];
                         $admin_password = $_POST['admin_password'];
-                        
                         // Xác nhận dữ liệu từ user
 
                         function checkSiteName($sitename) { // kiểm tra tên site
@@ -137,10 +133,24 @@
                             // Tạo bảng
                             $db->createTable("CREATE TABLE users (
                                 id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                                wdc_id varchar(50) NOT NULL UNIQUE,
                                 username varchar(50) NOT NULL UNIQUE,
                                 email varchar(50) NOT NULL UNIQUE,
                                 hash_password varchar(200) NOT NULL,
-                                userrole varchar(20) NOT NULL,
+                                ins_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                            )");
+                            $db->createTable("CREATE TABLE users_token (
+                                id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                                wdc_id varchar(50) NOT NULL UNIQUE,
+                                username varchar(50) NOT NULL UNIQUE,
+                                token varchar(200) NOT NULL,
+                                ins_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                            )");
+                            $db->createTable("CREATE TABLE users_permision (
+                                id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                                wdc_id varchar(50) NOT NULL UNIQUE,
+                                username varchar(50) NOT NULL UNIQUE,
+                                admincp varchar(3) NOT NULL,
                                 ins_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                             )");
                             $db->createTable("CREATE TABLE posts (
@@ -148,7 +158,7 @@
                                 title TEXT NOT NULL, 
                                 content LONGTEXT NOT NULL,
                                 author VARCHAR(50) NOT NULL,
-                                category VARCHAR(50) NOT NULL,
+                                category VARCHAR(50) NOT NULL DEFAULT 'uncategorized',
                                 date DATETIME NOT NULL,
                                 PRIMARY KEY (id)
                             )");
@@ -174,11 +184,15 @@
                                 value TEXT NOT NULL, 
                                 PRIMARY KEY (id)
                             )");
+                            require_once('functions.php');
                             // các cột
-                            $column = 'username, email, hash_password, userrole';
+                            $columnOfUser = 'wdc_id, username, email, hash_password, userrole';
+                            $columnOfToken = 'wdc_id, username, token';
                             // chèn dữ liệu vào bảng
-                            $db->insertTable('users', $column, $admin_username, $admin_email,$adminUserChecking->getHashPW(), 'Administrator');
+                            $userRegister = new userRegister($admin_username, $admin_email, $admin_password, 'admin',$db);
+                            $userRegister->status();
                             $db->insertTable('posts', 'title, content, author, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', 'wdcdoc', '2020-04-26 00:00:00');
+                            $db->insertTable('categories', 'title, content, author, date', 'Uncategorized', 'This is the default category.', 'wdcdoc', '2020-04-26 00:00:00');
                             $db->insertTable('settings', 'name, value', 'notify', 'Welcome to the Administrator Dashboard, thanks for using wdcDoc!');
                             $html = "<h2>Finish</h2>
                             <p>Congraturation! The installation has been finished successfully!</p>
@@ -208,8 +222,6 @@
             }
         break;
         default:
-        define('setting', 1);
-        @require('settings.php');
         switch ($installed) {
             case true: // nếu script đã cài rồi
                 $html = '<b style="line-height: 50px;">This software had been installed successfully, please delete this file to avoid security problems</b>';

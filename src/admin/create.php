@@ -62,12 +62,6 @@
             if (!$_POST['content']=='') {
                 // if (isset)
                 $content = $_POST['content']; // content
-                @$dom->loadHTML($content); // load dom
-                $script = $dom->getElementsByTagName('script'); // lấy tag script
-                $remove = []; // tạo arr $remove
-                foreach($script as $item){$remove[] = $item;} // lưu từng tag lấy được vào remove
-                foreach ($remove as $item){$item->parentNode->removeChild($item);} // lấy từng tag trong remove xoá child
-                $content = $dom->saveHTML(); // lưu
                 if (isset($fullDate)) {
                     // Gửi dữ liệu bài viết đến CSDL
                     switch ($typeRequest) {
@@ -84,9 +78,18 @@
                             break;
                     }
                     // Lấy giá trị mới đưa vào
-                    $success = "Create new $typeRequest success!";
-                    // $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol($typeRequest, "MAX(id)"));
-                    // header("Location: operation.php?request=edit&type=posts&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
+                    switch ($typeRequest) {
+                        case 'post':
+                            $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('posts', "MAX(id)"));
+                            break;
+                        case 'page':
+                            $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('pages', "MAX(id)"));
+                            break;
+                        case 'category':
+                            $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('categories', "MAX(id)"));
+                            break;
+                    }
+                    header("Location: edit.php?rdfrom=create&type=post&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                 } else {
                     $error = 'You must fill out which time to create this!';
                 }
