@@ -8,7 +8,7 @@
         die("You must run the installation file (install.php) in this directory before continue!");
     }
     require_once('../loginCheck.php');
-    loginCheck($wdc_id, $wdc_token, $db);
+    loginCheck($wdc_id, $wdc_token, $db, true);
 ?>
 <?php require_once(__DIR__.'/themes/default/header.php'); ?>
 
@@ -16,7 +16,7 @@
 
 <?php 
     $poststotal = mysqli_fetch_assoc($db->selectCol('posts', 'COUNT(*)'));
-    $pagestotal;
+    $pagestotal = mysqli_fetch_assoc($db->selectCol('pages', 'COUNT(*)'));
     $userstotal = mysqli_fetch_assoc($db->selectCol('users', 'COUNT(*)'));
     $notifyToAdmin = mysqli_fetch_assoc($db->selectValue('settings', "name='notify'", 'value'));
     $fnta_set = false;
@@ -45,7 +45,7 @@
                                             </tr>
                                             <tr>
                                                 <th scope="row">Total Page</th>
-                                                <td>N/A</td>
+                                                <td><?php echo $pagestotal['COUNT(*)'] ?></td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Total User</th>

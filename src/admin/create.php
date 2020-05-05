@@ -2,17 +2,15 @@
     session_start();
     define('isSet', 1);
     define('setting', 1);
-    require('settings.php');
+    require_once('settings.php');
+    require_once('db_connect.php');
+    require_once('../loginCheck.php');
     if (!isset($installed)) {
         die("You must run the installation file (install.php) in the admin directory in order to run this file.");
     }
-    if (!$_SESSION['logged']) { // nếu chưa đăng nhập thì chuyển hướng đến trang đăng nhập
-        if (!$_COOKIE['logged']) {
-            header("Location: $site_addr/login.php",TRUE,303);
-            die('Not logged');
-        }
-    }
-    require('db_connect.php');
+    // Kiểm tra đăng nhập
+    loginCheck($wdc_id,$wdc_token,$db,true);
+    require_once('services/categoryConvert.php');
 ?>
 
 <?php 
@@ -43,7 +41,7 @@
         $fullDate = null;
     }
     $dom = new DOMDocument();
-    // Process the user content:
+    // Xử lý nội dung của user:
     function errorTemplate($error)
     {
         if (isset($error)) {
@@ -56,40 +54,58 @@
             return "<div class='alert alert-success' role='alert'>".$success."</div>";
         }
     }
-    if ($issubmit == 'yes') {
+    if ($issubmit == 'yes') { // nếu user nhấn create
+        if (isset($_COOKIE['wdc_id'])) { // kt cookie
+            $userId = $_COOKIE['wdc_id'];
+        } else {
+            $userId = $_SESSION['wdc_id'];
+        }
+        // lấy dữ liệ
+        $resultfdb = mysqli_fetch_assoc($db->selectValue('users', "wdc_id='$userId'", 'username'));
+        $author = $resultfdb['username'];
         if (!$_POST['title']=='') { // Nếu title đã được nhập
             $title = $_POST['title']; // title
             if (!$_POST['content']=='') {
                 // if (isset)
                 $content = $_POST['content']; // content
                 if (isset($fullDate)) {
-                    // Gửi dữ liệu bài viết đến CSDL
                     switch ($typeRequest) {
                         case 'post':
-                            $db->insertTable('posts', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            // Gửi dữ liệu bài viết đến CSDL
+                            if (isset($_POST['category'])) { // nếu đã chọn
+                                $categoryId = $_POST['category']; // id của category
+                                $categoryResult = mysqli_fetch_assoc($db->selectValue('categories', "id = '$categoryId'", 'slug')); // lấy kết quả từ db
+                                $category = $categoryResult['slug']; // category là category slug
+                            } else { // nếu ko
+                                $category = 'uncategorized';
+                            }
+                            $db->insertTable('posts', 'title, content, author, category, date', $title, $content, $author, $category,$fullDate);
                             break;
                         
                         case 'page':
-                            $db->insertTable('pages', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            $db->insertTable('pages', 'title, content, author, date', $title, $content, $author, $fullDate);
                             break;
 
                         case 'category':
-                            $db->insertTable('categories', 'title, content, author, date', $title, $content, (isset($_SESSION['username'])) ? $_SESSION['username'] : $_COOKIE['username'], $fullDate);
+                            $slug = convert_category($title);
+                            $db->insertTable('categories', 'title, slug, content, author, date', $title, $slug, $content, $author, $fullDate);
                             break;
                     }
                     // Lấy giá trị mới đưa vào
                     switch ($typeRequest) {
                         case 'post':
                             $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('posts', "MAX(id)"));
+                            header("Location: edit.php?rdfrom=create&type=post&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                             break;
                         case 'page':
                             $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('pages', "MAX(id)"));
+                            header("Location: edit.php?rdfrom=create&type=page&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                             break;
                         case 'category':
                             $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol('categories', "MAX(id)"));
+                            header("Location: edit.php?rdfrom=create&type=category&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                             break;
                     }
-                    header("Location: edit.php?rdfrom=create&type=post&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                 } else {
                     $error = 'You must fill out which time to create this!';
                 }
@@ -108,6 +124,22 @@
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
 
 <?php 
+
+$categories = $db->selectCol('categories', 'id', 'title');
+$categoriesResults = mysqli_fetch_all($categories);
+$categoryOptions = "<input type='radio' name='category' value='1' id='category-1' checked='checked'> <label for='category-1'>Uncategorized</label> <br>";
+for ($i=1; $i < count($categoriesResults); $i++) { 
+    for ($j=0; $j < count($categoriesResults[$i]); $j++) { 
+        if ($j==0){
+            $val = $categoriesResults[$i][0];
+        } else {
+            $name = $categoriesResults[$i][$j];
+            $categoryOptions .= "<input type='radio' name='category' value='$val' id='category-$val'> <label for='category-$val'>$name</label> <br>";
+        }
+    }
+}
+
+
 $createOn = 
 "<h5>When</h5>
 <input type='number' name='date' id='wdc_edate' min='0' max='31' value='$fdate'>
@@ -213,13 +245,8 @@ $createOn =
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
                             <h5>Category</h5>
-                            <div class='form-group'>
-                                <select multiple class='form-control' name='' id=''>
-                                    <option>Test1</option>
-                                    <option>Test1</option>
-                                    <option>Test1</option>
-                                </select>
-                            </div>
+                            $categoryOptions
+                            <br>
                             <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>
@@ -248,6 +275,7 @@ $htmlCreatePage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
+                            <br>
                             <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>
@@ -276,6 +304,7 @@ $htmlCreatePage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
+                            <br>
                             <span><button id='create' class='btn btn-info' type='submit'>Create</button></span>
                         </div>
                     </div>

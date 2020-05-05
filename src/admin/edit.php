@@ -9,12 +9,13 @@
     }
     // Kiểm tra đăng nhập
     require_once('../loginCheck.php');
-    loginCheck($wdc_id, $wdc_token, $db);
+    loginCheck($wdc_id, $wdc_token, $db, true); // kiểm tra đăng nhập
 ?>
 
 <?php 
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $typeRequest = $_GET['type'];
+    $isDelete = $_GET['delete'];
     // Nếu chuyển hướng từ create
     if ($_GET['rdfrom']=='create') {
         $success = "Create new $typeRequest successfully";
@@ -88,7 +89,7 @@
             return "<div class='alert alert-success' role='alert'>".$success."</div>";
         }
     }
-    if ($issubmit == 'yes') {
+    if ($issubmit == 'yes' && !$isDelete) {
         if (!$_POST['title']=='') { // Nếu title đã được nhập
             $title = $_POST['title']; // title
             if (!$_POST['content']=='') {
@@ -98,7 +99,15 @@
                     // Gửi dữ liệu bài viết đến CSDL
                     switch ($typeRequest) {
                         case 'post':
+                            if (isset($_POST['category'])) { // nếu đã chọn
+                                $categoryId = $_POST['category']; // id của category
+                                $categoryResult = mysqli_fetch_assoc($db->selectValue('categories', "id = '$categoryId'", 'slug')); // lấy kết quả từ db
+                                $category = $categoryResult['slug']; // category là category slug
+                            } else { // nếu ko
+                                $category = 'uncategorized';
+                            }
                             $db->editValue('posts', "id=$id", 'title', "'$title'");
+                            $db->editValue('posts', "id=$id", 'category', "'$category'");
                             $db->editValue('posts', "id=$id", 'content', "'$content'");
                             $db->editValue('posts', "id=$id", 'date', "'$fullDate'");
                             break;
@@ -128,6 +137,24 @@
         } else {
             $error = 'You must fill out the title!';
         }
+    } elseif ($isDelete == true) {
+        switch ($typeRequest) {
+            case 'post':
+                $db->deleteFromTable('posts', "id=$id");
+                header("Location: $site_addr/admin/view.php?type=posts&rdfrom=editrm", true, 303);
+                break;
+            
+            case 'page':
+                $db->deleteFromTable('pages', "id=$id");
+                header("Location: $site_addr/admim/view.php?type=pages&rdfrom=editrm", true, 303);
+                break;
+
+            case 'category':
+                $db->deleteFromTable('categories', "id=$id");
+                header("Location: $site_addr/admin/view.php?type=categories&rdfrom=editrm", true, 303);
+                break;
+        }
+        
     }
     $formAction = "edit.php?type=$typeRequest&id=$id&issubmit=yes";
 ?>
@@ -137,6 +164,24 @@
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
 
 <?php 
+$postCategoryResultFDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'category'));
+$postCategory = $postCategoryResultFDb['category'];
+$categories = $db->selectCol('categories', 'id', 'title');
+$resultCategoryToSelect = mysqli_fetch_assoc($db->selectValue('categories', "slug='$postCategory'", 'id'));
+$categoryToSelect = $resultCategoryToSelect['id'];
+$categoriesResults = mysqli_fetch_all($categories);
+$categoryOptions = "<input type='radio' name='category' value='1' id='category-1'> <label for='category-1'>Uncategorized</label> <br>";
+for ($i=1; $i < count($categoriesResults); $i++) { 
+    for ($j=0; $j < count($categoriesResults[$i]); $j++) { 
+        if ($j==0){
+            $val = $categoriesResults[$i][0];
+        } else {
+            $name = $categoriesResults[$i][$j];
+            $categoryOptions .= "<input type='radio' name='category' value='$val' id='category-$val'> <label for='category-$val'>$name</label> <br>";
+        }
+    }
+}
+
 $createOn = 
 "<h5>When</h5>
 <input type='number' name='date' id='wdc_edate' min='0' max='31' value='$fdate'>
@@ -161,24 +206,6 @@ $createOn =
 "<style>
 </style>";
     $js = '<script>'.selectMonth($fmonth);
-    if ($operationType == 'edit') {
-        switch ($typeRequest) {
-            case 'posts':
-                $js .= "$.post('url.php', {type: 'post', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-
-            case 'pages':
-                $js .= "$.post('url.php', {type: 'page', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-
-            case 'categories':
-                $js .= "$.post('url.php', {type: 'category', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-            
-            default:
-                break;
-        }
-    }
     $js .= "let collapseCol = false;
     $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
     $('#wdc_collapseActivate').on('click', function (){
@@ -195,6 +222,27 @@ $createOn =
             collapseCol = false;
         break;}
     });
+    $('#delete').on('click', function (){
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+                if (result.value) {
+                    Swal.fire(
+                        'Deleted!',
+                        'The $typeRequest has been deleted.',
+                        'success'
+                    )
+                    window.location.assign('edit.php?type=$typeRequest&id=$id&delete=true');
+                }
+        })
+    });
+    $('#category-$categoryToSelect').attr('checked','checked');
     ";
     $js .= '</script>';
     $invalidRequest =
@@ -220,15 +268,9 @@ $createOn =
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
                             <h5>Category</h5>
-                            <div class='form-group'>
-                                <select multiple class='form-control' name='' id=''>
-                                    <option>Test1</option>
-                                    <option>Test1</option>
-                                    <option>Test1</option>
-                                </select>
-                            </div>
-                            <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
-                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
+                            $categoryOptions
+                            <br>
+                            <span><button id='edit' class='btn btn-info' type='submit'>Save</button><div class='btn btn-danger' id='delete'>Delete</div></span>
                         </div>
                     </div>
                 </div>
@@ -256,8 +298,8 @@ $htmlEditPage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
-                            <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
-                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
+                            <br>
+                            <span><button id='edit' class='btn btn-info' type='submit'>Save</button><div class='btn btn-danger' id='delete'>Delete</div></span>
                         </div>
                     </div>
                 </div>
@@ -273,7 +315,7 @@ $htmlEditPage =
                 <div class='col'>
                     <h2>Edit category</h2>
                     ".successTemplate($success).errorTemplate($error)."
-                    <input type='text' class='form-control' name='title' alue='$title'>
+                    <input type='text' class='form-control' name='title' value='$title'>
                 </div>
             </div>
             <div class='row'>
@@ -285,8 +327,8 @@ $htmlEditPage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
-                            <span><button id='edit' class='btn btn-info' type='submit'>Edit</button></span>
-                            <span><a id='delete' class='btn btn-info' type='submit'>Delete</a></span>
+                            <br>
+                            <span><button id='edit' class='btn btn-info' type='submit'>Save</button><div class='btn btn-danger' id='delete'>Delete</div></span>
                         </div>
                     </div>
                 </div>

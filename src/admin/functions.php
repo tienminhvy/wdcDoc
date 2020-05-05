@@ -10,7 +10,7 @@
         public function __construct($username, $email, $password, $role, $db) {
             $this->username = $username;
             $this->email = $email;
-            $this->password = $password;
+            $this->password = htmlspecialchars($password);
             $this->db = $db;
             $this->role = $role;
         }
@@ -75,22 +75,26 @@
     title: 'Success!',
     text: 'You have logged in successfully',
     icon: 'success',
+    showCloseButton: false,
 })
 function redirect(){
     window.location.assign('.');
 }
-setTimeout(redirect,3000);
+Swal.disableButtons();
+setTimeout(redirect,2000);
 ";
             // Thông báo khi admin đăng nhập thành công
             $this->notifyIfTrue_Admin = "Swal.fire({
     title: 'Success!',
     text: 'You have logged in as Administrator successfully',
     icon: 'success',
+    showCloseButton: false,
 })
 function redirect(){
     window.location.assign('admin');
 }
-setTimeout(redirect,3000);
+Swal.disableButtons();
+setTimeout(redirect,2000);
 ";
         }
         // Hàm kiểm tra tên đăng nhập

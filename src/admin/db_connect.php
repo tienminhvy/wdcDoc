@@ -86,7 +86,7 @@
             return mysqli_query($this->conn, "UPDATE $table SET $column=$value WHERE $condition;");
         }
 
-        public function deleteFromPost($table, $condition)
+        public function deleteFromTable($table, $condition)
         {
             return mysqli_query($this->conn, "DELETE FROM $table WHERE $condition;");
         }
