@@ -243,6 +243,16 @@ $createOn =
         })
     });
     $('#category-$categoryToSelect').attr('checked','checked');
+    $(function () {
+        tinymce.get('textarea').on('keyup', function(e) {
+            content = tinymce.get('textarea').getContent();
+            if (content != '') {
+                window.onbeforeunload = function(e){
+                    e.returnValue = 'Information entered will be lost forever!';
+                };
+            }
+        });
+    });
     ";
     $js .= '</script>';
     $invalidRequest =

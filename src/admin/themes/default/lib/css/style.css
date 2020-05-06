@@ -138,6 +138,9 @@ span {
 #wdc_ad_nav2 > ul > li {
     position: relative;
 }
+#wdc_ad_nav2 > ul > li > a{
+    height: 49px;
+}
 
 #wdc_ad_nav2 > ul > li > ul {
     position: absolute;
@@ -158,8 +161,9 @@ span {
 
 #wdc_ad_nav2 > ul > li > ul a {
     font-size: 15px;
-    padding-top: 15px;
+    padding: 15px;
     padding-left: 40px;
+    height: 50px;
 }
 
 .wdc_ad_nav2_collapsedMenu {

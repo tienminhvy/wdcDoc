@@ -56,26 +56,27 @@
             }
             break;
         case 'pages':
-            $getFDb = $db->selectCol('pages', 'id', 'title', 'author');
-            $getCFDb = $db->selectCol('pages', 'COUNT(id) AS count');
+            $getFDb = $db->selectCol('pages', 'id', 'title', 'author'); // lấy id, title, tác giả từ db
+            $getCFDb = $db->selectCol('pages', 'COUNT(id) AS count'); // đếm số lượng
             $result = mysqli_fetch_all($getFDb);
             $resultC = mysqli_fetch_assoc($getCFDb);
-            if ($resultC['count'] < 10) {
-                $page=1;
-                for ($i=0; $i < $resultC['count']; $i++) { 
+            if ($resultC['count'] < 10) { // nếu số lượng bài dưới 10
+                $page=1; // bài đầu tiên là 1
+                for ($i=0; $i < $resultC['count']; $i++) {  // vòng lặp in bài
+                    $template = ''; // reset biến template
                     for ($j=0; $j < count($result[$i]); $j++) {
                         if ($j>0) {
                             $template .= 
                             "<td>".$result[$i][$j]."</td>";
                         } elseif ($j == 0) {
-                            $pageId = $result[$i][$j];
+                            $pageId = $result[$i][$j]; // lấy id của page
                         }
                     }
-                    $print .= 
+                    $print .= // lưu bài vào biến
                         "<tr>
                             <th scope='row'>$page</th>
                             $template
-                            <td><span><a href='edit.php?type=page&id=$pageId' class='btn btn-info'>Edit</a></span><span><a href='edit.php?type=page&id=$pageId&delete=true' class='btn btn-danger delete'>Remove</a></span></td>
+                            <td><span><a href='edit.php?type=page&id=$pageId' class='btn btn-info'>Edit</a></span><span><button data-id='$pageId' class='btn btn-danger delete'>Remove</button></span></td>
                         </tr>";
                     $page++;
                 }
@@ -86,8 +87,35 @@
             }
             break;
         case 'categories':
-            $getFDb = $db->selectCol('categories', 'title', 'author');
+            $getFDb = $db->selectCol('categories', 'id', 'title', 'author'); // lấy id, title, tác giả từ db
+            $getCFDb = $db->selectCol('categories', 'COUNT(id) AS count'); // đếm số lượng
             $result = mysqli_fetch_all($getFDb);
+            $resultC = mysqli_fetch_assoc($getCFDb);
+            if ($resultC['count'] < 10) { // nếu số lượng bài dưới 10
+                $category=1; // bài đầu tiên là 1
+                for ($i=0; $i < $resultC['count']; $i++) {  // vòng lặp in bài
+                    $template = ''; // reset biến template
+                    for ($j=0; $j < count($result[$i]); $j++) {
+                        if ($j>0) {
+                            $template .= 
+                            "<td>".$result[$i][$j]."</td>";
+                        } elseif ($j == 0) {
+                            $categoryId = $result[$i][$j]; // lấy id của category
+                        }
+                    }
+                    $print .= // lưu bài vào biến
+                        "<tr>
+                            <th scope='row'>$category</th>
+                            $template
+                            <td><span><a href='edit.php?type=category&id=$categoryId' class='btn btn-info'>Edit</a></span><span><button data-id='$categoryId' class='btn btn-danger delete'>Remove</button></span></td>
+                        </tr>";
+                    $category++;
+                }
+            } elseif ($pagination==1) {
+                
+            } else {
+
+            }
             break;
     }
 
@@ -156,7 +184,19 @@ $('.delete').on('click', function (){
     <div class='container'>
         <div class='row'>
             <div class='col'>
-                Test
+                <table class='table'>
+                    <thead>
+                        <tr>
+                            <th scope='col'>#</th>
+                            <th scope='col'>Title</th>
+                            <th scope='col'>Author</th>
+                            <th scope='col'>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $print
+                    </tbody>
+                </table>
             </div>
         </row>
     </div>
@@ -166,7 +206,19 @@ $('.delete').on('click', function (){
     <div class='container'>
         <div class='row'>
             <div class='col'>
-                Test
+                <table class='table'>
+                    <thead>
+                        <tr>
+                            <th scope='col'>#</th>
+                            <th scope='col'>Title</th>
+                            <th scope='col'>Author</th>
+                            <th scope='col'>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $print
+                    </tbody>
+                </table>
             </div>
         </row>
     </div>

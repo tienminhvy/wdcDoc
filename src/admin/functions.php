@@ -13,6 +13,7 @@
             $this->password = htmlspecialchars($password);
             $this->db = $db;
             $this->role = $role;
+            $this->__createNewUser();
         }
 
         private function __createCustomID()
@@ -36,19 +37,10 @@
                     $this->db->insertTable('users_permision', 'wdc_id, username, admincp', $this->userID, $this->username, 'no');
                     break;
             }
-            if(!$this->db->insertTable('users', 'wdc_id, username, email, hash_password', $this->userID, $this->username, $this->email, $this->__createNewHashPW())) {
-                return false;
+            if($this->db->insertTable('users', 'wdc_id, username, email, hash_password', $this->userID, $this->username, $this->email, $this->__createNewHashPW())) {
+                $this->status = true;
             } else {
-                return true;
-            }
-        }
-        
-        public function status()
-        {
-            if (!$this->__createNewUser()) {
-                return false;
-            } else {
-                return true;
+                $this->status = false;
             }
         }
     }

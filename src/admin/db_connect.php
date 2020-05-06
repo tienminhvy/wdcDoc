@@ -60,6 +60,9 @@
             VALUES ($valToIns)");
             if (!$ins){
                 echo 'Error: '.$ins.'<br>'.mysqli_error($this->conn);
+                return false;
+            } else {
+                return true;
             }
         }
 
