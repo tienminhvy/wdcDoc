@@ -16,8 +16,9 @@
 ?>
 
 <?php 
+    $typeRequest = $_GET['type'];
     $rdfrom = $_GET['rdfrom'];
-    if ($rdfrom = 'add') {
+    if ($rdfrom == 'add') {
         $success = 'Add new user successfully!';
     }
     // Xử lí dữ liệu
@@ -97,9 +98,55 @@
         
     }
     // end
+    if ($typeRequest==''){
+        $usersMethod = 'main';
+    } else {
+        $usersMethod = $typeRequest;
+    }
+    $css = 
+"<style>
+.users.$usersMethod > a {
+    background: black;
+    color: rgb(231, 231, 231);
+}
+#wdc_admin_users > a{
+    background: black;
+}
+.wdc_submenu_01 {
+    position: static !important;
+    top: 0 !important;
+    z-index: 1 !important;
+    background: #363636 !important;
+    width: 200px !important;
+    left: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: unset !important;
+}
+.wdc_submenu_01_collapsed {
+    left: 45px !important;
+    opacity: 0;
+}
+</style>";
     $windowLocation = 'window.location.assign(`users.php?type=edit&id=${id}&delete=true`);';
     $js =
 "<script>
+let collapseCol = false;
+    $('#wdc_admin_users > ul').addClass('wdc_submenu_01');
+    $('#wdc_collapseActivate').on('click', function (){
+        switch (collapseCol) {
+            case false:
+            $('#wdc_admin_users > ul').removeClass('wdc_submenu_01');
+            $('#wdc_admin_users > ul').addClass('wdc_submenu_01_collapsed');
+            collapseCol = true;
+            break;
+
+            default:
+            $('#wdc_admin_users > ul').addClass('wdc_submenu_01');
+            $('#wdc_admin_users > ul').removeClass('wdc_submenu_01_collapsed');
+            collapseCol = false;
+        break;}
+    });
 $('.delete').on('click', function (){
     Swal.fire({
         title: 'Are you sure?',
@@ -220,7 +267,6 @@ $('.delete').on('click', function (){
         </div>
     </div>
 </main>";
-    $typeRequest = $_GET['type'];
     switch ($typeRequest) {
         case 'add':
             echo $htmlAddUser;
@@ -234,4 +280,5 @@ $('.delete').on('click', function (){
             break;
     }
     require_once('themes/default/footer.php');
+    echo $css.$js;
 ?>

@@ -186,24 +186,6 @@ $createOn =
 }
 </style>";
     $js = '<script>'.selectMonth($fmonth);
-    if ($operationType == 'edit') {
-        switch ($typeRequest) {
-            case 'posts':
-                $js .= "$.post('url.php', {type: 'post', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-
-            case 'pages':
-                $js .= "$.post('url.php', {type: 'page', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-
-            case 'categories':
-                $js .= "$.post('url.php', {type: 'category', id: $idToEdit},function (data,status) { $('#permalink').html(data);});";
-                break;
-            
-            default:
-                break;
-        }
-    }
     $js .= "let collapseCol = false;
     $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
     $('#wdc_collapseActivate').on('click', function (){
