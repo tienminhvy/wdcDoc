@@ -32,8 +32,8 @@
             <li id="wdc_admin_users">
                 <a href="<?php echo $site_addr.'/admin/users.php'?>"><i class="fi-cnsuxl-user-circle-solid"></i><span>Users</span></a>
                 <ul>
-                    <li class=""><a href="<?php echo $site_addr.'/admin/users.php'?>">Manage users</a></li>
-                    <li class=""><a href="<?php echo $site_addr.'/admin/users.php?type=add'?>">Add user</a></li>
+                    <li class="users main"><a href="<?php echo $site_addr.'/admin/users.php'?>">Manage users</a></li>
+                    <li class="users add"><a href="<?php echo $site_addr.'/admin/users.php?type=add'?>">Add user</a></li>
                 </ul>
             </li>
             <li id="wdc_admin_create">
