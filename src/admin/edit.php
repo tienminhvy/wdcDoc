@@ -26,21 +26,21 @@
     switch ($typeRequest) { // lấy dữ liệu từ db
         case 'post':
             if ($db->selectValue('posts', "id=$id", 'title', 'content', 'date')!==false) {
-                $dataFromDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'title', 'content', 'date'));
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'title', 'content', 'author', 'date'));
             } else {
                 $dataFromDb = null;
             }
             break;
         case 'page':
             if ($db->selectValue('pages', "id=$id", 'title', 'content', 'date')!==false) {
-                $dataFromDb = mysqli_fetch_assoc($db->selectValue('pages', "id=$id", 'title', 'content', 'date'));
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('pages', "id=$id", 'title', 'content', 'author', 'date'));
             } else {
                 $dataFromDb = null;
             }
             break;
         case 'category':
             if ($db->selectValue('categories', "id=$id", 'title', 'content', 'date')!==false) {
-                $dataFromDb = mysqli_fetch_assoc($db->selectValue('categories', "id=$id", 'title', 'content', 'date'));
+                $dataFromDb = mysqli_fetch_assoc($db->selectValue('categories', "id=$id", 'title', 'content', 'author', 'date'));
             } else {
                 $dataFromDb = null;
             }
@@ -106,29 +106,43 @@
                             } else { // nếu ko
                                 $category = 'uncategorized';
                             }
+                            // chỉnh sửa bài viết
                             $db->editValue('posts', "id=$id", 'title', "'$title'");
                             $db->editValue('posts', "id=$id", 'category', "'$category'");
                             $db->editValue('posts', "id=$id", 'content', "'$content'");
                             $db->editValue('posts', "id=$id", 'date', "'$fullDate'");
+                            if (isset($_POST['author'])) {
+                                $author = $_POST['author'];
+                                $db->editValue('posts', "id=$id", 'author', "'$author'");
+                            }
                             break;
                         
                         case 'page':
+                            // chỉnh sửa trang
                             $db->editValue('pages', "id=$id", 'title', "'$title'");
                             $db->editValue('pages', "id=$id", 'content', "'$content'");
                             $db->editValue('pages', "id=$id", 'date', "'$fullDate'");
+                            if (isset($_POST['author'])) {
+                                $author = $_POST['author'];
+                                $db->editValue('pages', "id=$id", 'author', "'$author'");
+                            }
                             break;
 
                         case 'category':
+                            // chỉnh sửa chuyên mục
                             $db->editValue('categories', "id=$id", 'title', "'$title'");
                             $db->editValue('categories', "id=$id", 'content', "'$content'");
                             $db->editValue('categories', "id=$id", 'date', "'$fullDate'");
+                            if (isset($_POST['author'])) {
+                                $author = $_POST['author'];
+                                $db->editValue('categories', "id=$id", 'author', "'$author'");
+                            }
                             break;
                     }
                     // Lấy giá trị mới đưa vào
                     $success = "Edit $typeRequest successfully!";
-                    // $idFromDbToEdit = mysqli_fetch_assoc($db->selectCol($typeRequest, "MAX(id)"));
-                    // header("Location: operation.php?request=edit&type=posts&id=".$idFromDbToEdit['MAX(id)'], TRUE, 303);
                 } else {
+                    // nếu ko thì báo lỗi
                     $error = 'You must fill out which time to create this!';
                 }
             } else {
@@ -146,12 +160,16 @@
             
             case 'page':
                 $db->deleteFromTable('pages', "id=$id");
-                header("Location: $site_addr/admim/view.php?type=pages&rdfrom=editrm", true, 303);
+                header("Location: $site_addr/admin/view.php?type=pages&rdfrom=editrm", true, 303);
                 break;
 
             case 'category':
-                $db->deleteFromTable('categories', "id=$id");
-                header("Location: $site_addr/admin/view.php?type=categories&rdfrom=editrm", true, 303);
+                if ($id!=1) {
+                    $db->deleteFromTable('categories', "id=$id");
+                    header("Location: $site_addr/admin/view.php?type=categories&rdfrom=editrm", true, 303);
+                } else {
+                    $error = 'This category is the default category, you cannot remove it!';
+                }
                 break;
         }
         
@@ -164,11 +182,12 @@
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
 
 <?php 
+// lấy dữ liệu từ db
 $postCategoryResultFDb = mysqli_fetch_assoc($db->selectValue('posts', "id=$id", 'category'));
 $postCategory = $postCategoryResultFDb['category'];
 $categories = $db->selectCol('categories', 'id', 'title');
 $resultCategoryToSelect = mysqli_fetch_assoc($db->selectValue('categories', "slug='$postCategory'", 'id'));
-$categoryToSelect = $resultCategoryToSelect['id'];
+$categoryToSelect = $resultCategoryToSelect['id']; // bài viết đang ở chuyên mục nào
 $categoriesResults = mysqli_fetch_all($categories);
 $categoryOptions = "<input type='radio' name='category' value='1' id='category-1'> <label for='category-1'>Uncategorized</label> <br>";
 for ($i=1; $i < count($categoriesResults); $i++) { 
@@ -181,6 +200,22 @@ for ($i=1; $i < count($categoriesResults); $i++) {
         }
     }
 }
+$authorSubmit = false;
+if (isset($_POST['author'])) {
+    $authorSubmit = true;
+}
+$authorResults = mysqli_fetch_all($db->selectValue('users_permision', "admincp='yes'", 'username'));
+for ($i=0; $i < count($authorResults); $i++) { 
+    $authorOption .="<option value='".$authorResults[$i][0]."'>".$authorResults[$i][0]."</option>";
+}
+
+$authorSelector = 
+"<div class='form-group'>
+    <label for='author'>Select author from list</label>
+    <select class='form-control' id='author' name='author'>
+        $authorOption
+    </select>
+</div>";
 
 $createOn = 
 "<h5>When</h5>
@@ -243,6 +278,7 @@ $createOn =
         })
     });
     $('#category-$categoryToSelect').attr('checked','checked');
+    $(`[value='".(($authorSubmit) ? $_POST['author'] : $dataFromDb['author'])."']`).attr('selected','selected');
     $(function () {
         tinymce.get('textarea').on('keyup', function(e) {
             content = tinymce.get('textarea').getContent();
@@ -277,6 +313,8 @@ $createOn =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
+                            <h5>Author</h5>
+                            $authorSelector
                             <h5>Category</h5>
                             $categoryOptions
                             <br>
@@ -308,6 +346,8 @@ $htmlEditPage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
+                            <h5>Author</h5>
+                            $authorSelector
                             <br>
                             <span><button id='edit' class='btn btn-info' type='submit'>Save</button><div class='btn btn-danger' id='delete'>Delete</div></span>
                         </div>
@@ -337,6 +377,8 @@ $htmlEditPage =
                         <div class='card-body'>
                             <h5 class='card-title'>Configuration</h5>
                             $createOn
+                            <h5>Author</h5>
+                            $authorSelector
                             <br>
                             <span><button id='edit' class='btn btn-info' type='submit'>Save</button><div class='btn btn-danger' id='delete'>Delete</div></span>
                         </div>
@@ -346,6 +388,9 @@ $htmlEditPage =
         </div>
     </form>
 </main>";
+
+$categoryDoNotDelete = 
+"";
 
     if (!$dataFromDb==null) { // kiểm tra xem dữ liệu trả về có null ko
         switch ($typeRequest) {

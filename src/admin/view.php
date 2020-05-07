@@ -10,6 +10,7 @@
     // Kiểm tra đăng nhập
     require_once('../loginCheck.php');
     loginCheck($wdc_id, $wdc_token, $db, true);
+    require_once('functions.php');
 ?>
 
 <?php 
@@ -17,128 +18,6 @@
 ?>
 
 <?php 
-    function pagination($pagination, $count, $total, $typeRequest) {
-        if ($pagination>$count) {
-            $GLOBALS['errorCheck'] = true;
-            $GLOBALS['error'] = "Exceeded maximum count for $typeRequest, please try again!";
-        }
-        if ($total < 10) { // nếu số lượng bài dưới 10
-            if ($pagination>1) { // nếu ko set pagination trên url
-                $pagination = 1; // mặc định là 1
-            }
-        } elseif ($pagination==1 || $pagination=='') { // nếu đang ở trang view
-            if ($count<4) { // kiểm tra nếu count < 4
-                for ($i=1; $i <= $count; $i++) { 
-                    $item .=
-                    "<li class='page-item' id='paginate-$i'><a class='page-link' href='view.php?type=$typeRequest&pagination=$i'>$i</a></li>";
-                }
-            } else {
-                for ($i=1; $i < 4; $i++) { 
-                    $item .=
-                    "<li class='page-item' id='paginate-$i'><a class='page-link' href='view.php?type=$typeRequest&pagination=$i'>$i</a></li>";
-                }
-                // trang cuối cùng
-                $item .= 
-                "<li class='page-item'>
-                <a class='page-link' href='view.php?type=$typeRequest&pagination=$count' aria-label='Next'>
-                <span aria-hidden='true'>&raquo;</span>
-                <span class='sr-only'>Next</span>
-                </a>
-                </li>";
-            }
-            // lưu
-            $GLOBALS['htmlPagination'] = 
-            "<nav aria-label='Page navigation'>
-            <ul class='pagination'>
-            $item
-            </ul>
-            </nav>";
-        } elseif ($pagination>1&&$pagination<4) { // nếu đang ở pagination là 2 và 3
-            if ($pagination==$count) { // nếu số pagination trên url == count
-                for ($i=1; $i <= $pagination; $i++) { 
-                    $item .=
-                    "<li class='page-item' id='paginate-$i'><a class='page-link' href='view.php?type=$typeRequest&pagination=$i'>$i</a></li>";
-                }
-            } elseif (($pagination+1)==$count||($pagination+2)==$count) {
-                for ($i=1; $i <= $count; $i++) { 
-                    $item .=
-                    "<li class='page-item' id='paginate-$i'><a class='page-link' href='view.php?type=$typeRequest&pagination=$i'>$i</a></li>";
-                }
-            } else {
-                for ($i=1; $i <= $pagination; $i++) { 
-                    $item .=
-                    "<li class='page-item' id='paginate-$i'><a class='page-link' href='view.php?type=$typeRequest&pagination=$i'>$i</a></li>";
-                }
-                $item .=
-                "<li class='page-item' id='paginate-".($pagination+1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+1)."'>".($pagination+1)."</a></li>
-                <li class='page-item' id='paginate-".($pagination+2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+2)."'>".($pagination+2)."</a></li>";
-                $item .= 
-                "<li class='page-item'>
-                <a class='page-link' href='view.php?type=$typeRequest&pagination=$count' aria-label='Next'>
-                <span aria-hidden='true'>&raquo;</span>
-                <span class='sr-only'>Next</span>
-                </a>
-                </li>";
-            }
-            $GLOBALS['htmlPagination'] = 
-            "<nav aria-label='Page navigation'>
-            <ul class='pagination'>
-            $item
-            </ul>
-            </nav>";
-        } else {
-            $item = 
-            "<li class='page-item'>
-            <a class='page-link' href='view.php?type=$typeRequest&pagination=1' aria-label='Previous'>
-            <span aria-hidden='true'>&laquo;</span>
-            <span class='sr-only'>Previous</span>
-            </a>
-            </li>";
-            if ($pagination==$count) {
-                $item .=
-                "<li class='page-item' id='paginate-".($pagination-4)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-4)."'>".($pagination-4)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-3)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-3)."'>".($pagination-3)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-2)."'>".($pagination-2)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-1)."'>".($pagination-1)."</a></li>
-                <li class='page-item' id='paginate-".($pagination)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination)."'>".($pagination)."</a></li>
-                ";
-            } elseif (($pagination+1)==$count) {
-                $item .= 
-                "<li class='page-item' id='paginate-".($pagination-3)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-3)."'>".($pagination-3)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-2)."'>".($pagination-2)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-1)."'>".($pagination-1)."</a></li>
-                <li class='page-item' id='paginate-$pagination'><a class='page-link' href='view.php?type=$typeRequest&pagination=$pagination'>$pagination</a></li>
-                <li class='page-item' id='paginate-".($pagination+1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+1)."'>".($pagination+1)."</a></li>";
-            } elseif (($pagination+2)==$count) {
-                $item .= 
-                "<li class='page-item' id='paginate-".($pagination-2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-2)."'>".($pagination-2)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-1)."'>".($pagination-1)."</a></li>
-                <li class='page-item' id='paginate-$pagination'><a class='page-link' href='view.php?type=$typeRequest&pagination=$pagination'>$pagination</a></li>
-                <li class='page-item' id='paginate-".($pagination+1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+1)."'>".($pagination+1)."</a></li>
-                <li class='page-item' id='paginate-".($pagination+2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+2)."'>".($pagination+2)."</a></li>";
-            } else {
-                $item .= 
-                "<li class='page-item' id='paginate-".($pagination-2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-2)."'>".($pagination-2)."</a></li>
-                <li class='page-item' id='paginate-".($pagination-1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination-1)."'>".($pagination-1)."</a></li>
-                <li class='page-item' id='paginate-$pagination'><a class='page-link' href='view.php?type=$typeRequest&pagination=$pagination'>$pagination</a></li>
-                <li class='page-item' id='paginate-".($pagination+1)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+1)."'>".($pagination+1)."</a></li>
-                <li class='page-item' id='paginate-".($pagination+2)."'><a class='page-link' href='view.php?type=$typeRequest&pagination=".($pagination+2)."'>".($pagination+2)."</a></li>";
-                $item .=
-                "<li class='page-item'>
-                <a class='page-link' href='view.php?$total&pagination=$count' aria-label='Next'>
-                <span aria-hidden='true'>&raquo;</span>
-                <span class='sr-only'>Next</span>
-                </a>
-                </li>";
-            }
-            $GLOBALS['htmlPagination'] = 
-            "<nav aria-label='Page navigation'>
-            <ul class='pagination'>
-            $item
-            </ul>
-            </nav>";
-        }
-    }
     $typeRequest = $_GET['type'];
     if (isset($_GET['pagination'])) {
         $pagination = $_GET['pagination'];
@@ -297,6 +176,9 @@
             $getCFDb = $db->selectCol('categories', 'COUNT(id) AS count'); // đếm số lượng
             $result = mysqli_fetch_all($getFDb);
             $resultC = mysqli_fetch_assoc($getCFDb);
+            $total = $resultC['count'];
+            $count = $resultC['count'];
+            $count = ceil($count/10); // số trang pagination
             if ($resultC['count'] < 10) { // nếu số lượng bài dưới 10
                 $category=1; // bài đầu tiên là 1
                 for ($i=0; $i < $resultC['count']; $i++) {  // vòng lặp in bài
@@ -317,10 +199,49 @@
                         </tr>";
                     $category++;
                 }
-            } elseif ($pagination==1) {
-                
-            } else {
-
+            } else { // nếu ko
+                pagination($pagination, $count, $total, $typeRequest);
+                if ($pagination==$count) {
+                    $category=(($pagination-1)*10+1); // bài đầu tiên là (($pagination-1)*10+1). vd pagination = 2 thì bài đầu tiên là ((2-1)*10+1) == 11
+                    for ($i=(($pagination-1)*10); $i < $resultC['count']; $i++) {  // vòng lặp in bài
+                        $template = ''; // reset biến template
+                        for ($j=0; $j < count($result[$i]); $j++) {
+                            if ($j>0) {
+                                $template .= 
+                                "<td>".$result[$i][$j]."</td>";
+                            } elseif ($j == 0) {
+                                $categoryId = $result[$i][$j]; // lấy id của category
+                            }
+                        }
+                        $printContentFromDb .= // lưu bài vào biến
+                            "<tr>
+                                <th scope='row'>$category</th>
+                                $template
+                                <td><span><a href='edit.php?type=category&id=$categoryId' class='btn btn-info'>Edit</a></span><span><button data-id='$categoryId' class='btn btn-danger delete'>Remove</button></span></td>
+                            </tr>";
+                        $category++;
+                    }
+                } else {
+                    $category=(($pagination-1)*10+1); // bài đầu tiên là (($pagination-1)*10+1). vd pagination = 2 thì bài đầu tiên là ((2-1)*10+1) == 11
+                    for ($i=(($pagination-1)*10); $i < ($pagination*10); $i++) {  // vòng lặp in bài
+                        $template = ''; // reset biến template
+                        for ($j=0; $j < count($result[$i]); $j++) {
+                            if ($j>0) {
+                                $template .= 
+                                "<td>".$result[$i][$j]."</td>";
+                            } elseif ($j == 0) {
+                                $categoryId = $result[$i][$j]; // lấy id của category
+                            }
+                        }
+                        $printContentFromDb .= // lưu bài vào biến
+                            "<tr>
+                                <th scope='row'>$category</th>
+                                $template
+                                <td><span><a href='edit.php?type=category&id=$categoryId' class='btn btn-info'>Edit</a></span><span><button data-id='$categoryId' class='btn btn-danger delete'>Remove</button></span></td>
+                            </tr>";
+                        $category++;
+                    }
+                }
             }
             break;
     }
@@ -477,6 +398,7 @@
                         $printContentFromDb
                     </tbody>
                 </table>
+                $htmlPagination
             </div>
         </row>
     </div>

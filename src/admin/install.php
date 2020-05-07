@@ -191,8 +191,8 @@
                             $columnOfToken = 'wdc_id, username, token';
                             // chèn dữ liệu vào bảng
                             $userRegister = new userRegister($admin_username, $admin_email, $admin_password, 'admin',$db);
-                            $db->insertTable('posts', 'title, content, author, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', 'wdcdoc', '2020-04-26 00:00:00');
-                            $db->insertTable('categories', 'title, slug, content, author, date', 'Uncategorized', 'uncategorized','This is the default category.', 'wdcdoc', '2020-04-26 00:00:00');
+                            $db->insertTable('posts', 'title, content, author, date', 'Welcome to your first post!', 'Thanks you for using wdcDoc!', "'$admin_username'", '2020-04-26 00:00:00');
+                            $db->insertTable('categories', 'title, slug, content, author, date', 'Uncategorized', 'uncategorized','This is the default category.', "'$admin_username'", '2020-04-26 00:00:00');
                             $db->insertTable('settings', 'name, value', 'notify', 'Welcome to the Administrator Dashboard, thanks for using wdcDoc!');
                             $html = "<h2>Finish</h2>
                             <p>Congraturation! The installation has been finished successfully!</p>

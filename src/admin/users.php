@@ -16,10 +16,20 @@
 ?>
 
 <?php 
+    $id = $_GET['id'];
     $typeRequest = $_GET['type'];
     $rdfrom = $_GET['rdfrom'];
     if ($rdfrom == 'add') {
         $success = 'Add new user successfully!';
+    } elseif ($rdfrom == 'edit') {
+        $success = 'Edit user successfully!';
+    } elseif ($rdfrom == 'remove') {
+        $success = 'Remove user successfully!';
+    }
+    if ($_GET['delete']==true) {
+        $isDelete = $_GET['delete'];
+    } else {
+        $isDelete = false;
     }
     // Xử lí dữ liệu
     // lấy dữ liệu từ user
@@ -28,38 +38,90 @@
     $uPassword = $_POST['uPassword']; 
     $uConfirmPassword = $_POST['uConfirmPassword']; 
     $admincp = $_POST['admincp'];
-    if (isset($uUsername)||isset($uEmail)||isset($uPassword)){ // nếu đã nhập 1 trong 3
-        $userCheck = new userChecking($uUsername,$uEmail,$uPassword); // tạo obj kiểm tra
-        if ($userCheck->checkUsername()&&$userCheck->checkEmail()&&$userCheck->checkPassword()) { // nếu 3 đk đều đúng
-            if ($uConfirmPassword == '') { // nếu chưa xác nhận mk
-                $errPassword = '<b>You must confirm the password.</b>';
-            } elseif ($uPassword!=$uConfirmPassword) { // nếu mk xác nhận ko khớp
-                $errPassword = '<b>The confirm password do not match!</b>';
-            } else { // th còn lại
-                switch ($admincp) { 
-                    case 'on': // nếu có quyền truy cập ad
-                        $user = new userRegister($uUsername, $uEmail, $uPassword, 'admin', $db); // tạo mới user
+    switch ($typeRequest) {
+        case 'add':
+            if (isset($uUsername)||isset($uEmail)||isset($uPassword)){ // nếu đã nhập 1 trong 3
+                $userCheck = new userChecking($uUsername,$uEmail,$uPassword); // tạo obj kiểm tra
+                if ($userCheck->checkUsername()&&$userCheck->checkEmail()&&$userCheck->checkPassword()) { // nếu 3 đk đều đúng
+                    if ($uConfirmPassword == '') { // nếu chưa xác nhận mk
+                        $errPassword = '<b>You must confirm the password.</b>';
+                    } elseif ($uPassword!=$uConfirmPassword) { // nếu mk xác nhận ko khớp
+                        $errPassword = '<b>The confirm password do not match!</b>';
+                    } else { // th còn lại
+                        switch ($admincp) { 
+                            case 'on': // nếu có quyền truy cập ad
+                                $user = new userRegister($uUsername, $uEmail, $uPassword, 'admin', $db); // tạo mới user
+                                break;
+                            
+                            default: // nếu ko
+                                $user = new userRegister($uUsername, $uEmail, $uPassword, 'member', $db);
+                                break;
+                        }
                         if ($user->status){ // nếu tạo thành công
-                            header("Location: $site_addr/admin/users.php", true, 303);
+                            header("Location: $site_addr/admin/users.php?rdfrom=add", true, 303);
                             die('Create new user success!');
                         } else { // ngược lại
                             $error = 'Error when creating new user, please try again later.';
                         }
-                        break;
-                    
-                    default: // nếu ko
-                        // tương tự như trên
-                        $user = new userRegister($uUsername, $uEmail, $uPassword, 'member', $db);
-                        if ($user->status){
-                            header("Location: $site_addr/admin/users.php?rdfrom=add", true, 303);
-                            die('Create new user success!');
-                        } else {
-                            $error = 'Error when creating new user, please try again later.';
-                        }
-                        break;
+                    }
                 }
             }
-        }
+            break;
+        
+        case 'edit':
+            if (isset($id)) {
+                $checkIfFound = mysqli_fetch_assoc($db->selectValue('users', "id=$id", 'COUNT(id) as count'));
+            }
+            if ($checkIfFound['count']>0) {
+                $getFromDb = mysqli_fetch_assoc($db->selectValue('users', "id=$id", 'username', 'email'));
+                $getPermissionFromDb = mysqli_fetch_assoc($db->selectValue('users_permision', "username='".$getFromDb['username']."'", 'admincp'));
+            };
+            if ((isset($uEmail)||isset($uPassword))&&(!$isDelete)){ // nếu đã nhập 1 trong 3
+                $userCheck = new userChecking($uUsername,$uEmail,$uPassword); // tạo obj kiểm tra
+                if ($userCheck->checkUsername()&&$userCheck->checkEmail()) { // nếu 3 đk đều đúng
+                    if ($uPassword!=''&&$uConfirmPassword=='') {
+                        $errPassword = '<b>You must confirm the password!</b>';
+                    } elseif ($uPassword!==$uConfirmPassword){
+                        $errPassword = '<b>The confirm password do not match!</b>';
+                    } elseif ($uPassword==''&&$uConfirmPassword!='') {
+                        $errPassword = '<b>You must enter the password!</b>';
+                    } else {
+                        switch ($admincp) { 
+                            case 'on': // nếu có quyền truy cập ad
+                                $editUser = new editUser($uUsername, $uEmail, $uPassword, 'admin', $db);// chỉnh sửa user
+                                if ($uPassword=='') {
+                                    $editUser->editExistingUserWOPassword();
+                                } else {
+                                    $editUser->editExistingUserWPassword();
+                                }
+                                break;
+                            
+                            default: // nếu ko
+                                $editUser = new editUser($uUsername, $uEmail, $uPassword, 'member', $db);// chỉnh sửa user
+                                if ($uPassword=='') {
+                                    $editUser->editExistingUserWOPassword();
+                                } else {
+                                    $editUser->editExistingUserWPassword();
+                                }
+                                break;
+                        }
+                        if ($editUser->status){ // nếu tạo thành công
+                            header("Location: $site_addr/admin/users.php?rdfrom=edit", true, 303);
+                            die('Create new user success!');
+                        } else { // ngược lại
+                            $error = 'Error when editing new user, please try again later.';
+                        }
+                    }
+                }
+            } elseif ($isDelete) {
+                $db->selectValue('users', "id=$id");
+                $userToDel;
+                $db->deleteFromTable('users', "username=$userToDel");
+                $db->deleteFromTable('users_permision', "username=$userToDel");
+                $success = 'Delete user successfully';
+                header('Location: users.php', true, 303);
+            }
+            break;
     }
 ?>
 
@@ -92,10 +154,51 @@
             </tr>";
             $user++;
         }
-    } elseif ($pagination==1) {
-        
     } else {
-        
+        pagination($pagination, $count, $total, $typeRequest);
+        if ($pagination==$count) {
+            $user=(($pagination-1)*10+1); // bài đầu tiên là (($pagination-1)*10+1). vd pagination = 2 thì bài đầu tiên là ((2-1)*10+1) == 11
+            for ($i=(($pagination-1)*10); $i < $resultC['count']; $i++) {  // vòng lặp in bài
+                $template = ''; // reset biến template
+                for ($j=0; $j < count($result[$i]); $j++) {
+                    if ($j>0) {
+                        $template .= 
+                        "<td>".$result[$i][$j]."</td>";
+                    } elseif ($j == 0) {
+                        $userId = $result[$i][$j]; // lấy id của user
+                    }
+                }
+                $template .= "<td>".$resultPermision[$i][0]."</td>";
+                $print .= // lưu bài vào biến
+                    "<tr>
+                        <th scope='row'>$user</th>
+                        $template
+                        <td><span><a href='user.php?type=edit&id=$userId' class='btn btn-info'>Edit</a></span><span><button data-id='$userId' class='btn btn-danger delete'>Remove</button></span></td>
+                    </tr>";
+                $user++;
+            }
+        } else {
+            $user=(($pagination-1)*10+1); // bài đầu tiên là (($pagination-1)*10+1). vd pagination = 2 thì bài đầu tiên là ((2-1)*10+1) == 11
+            for ($i=(($pagination-1)*10); $i < ($pagination*10); $i++) {  // vòng lặp in bài
+                $template = ''; // reset biến template
+                for ($j=0; $j < count($result[$i]); $j++) {
+                    if ($j>0) {
+                        $template .= 
+                        "<td>".$result[$i][$j]."</td>";
+                    } elseif ($j == 0) {
+                        $userId = $result[$i][$j]; // lấy id của user
+                    }
+                }
+                $template .= "<td>".$resultPermision[$i][0]."</td>";
+                $print .= // lưu bài vào biến
+                    "<tr>
+                        <th scope='row'>$user</th>
+                        $template
+                        <td><span><a href='user.php?type=edit&id=$userId' class='btn btn-info'>Edit</a></span><span><button data-id='$userId' class='btn btn-danger delete'>Remove</button></span></td>
+                    </tr>";
+                $user++;
+            }
+        }
     }
     // end
     if ($typeRequest==''){
@@ -232,12 +335,52 @@ $('.delete').on('click', function (){
         </div>
     </div>
 </main>";
+    $getFromDb['username'];
+    if ($getPermissionFromDb['admincp']=='yes'){
+        $js1 = "<script>$('#admincp').attr('checked','checked');</script>";
+    };
     $htmlEditUser =
 "<main>
     <div class='container'>
         <div class='row'>
             <div class='col'>
                 <h2 class='text-center'>Edit user</h2>
+                ".errorTemplate($error)."
+                <form method='POST'>
+                    <div class='input-group mb-3'>
+                        <div class='input-group-prepend'>
+                            <label class='input-group-text' for='uUsername'>Username</label>
+                        </div>
+                        <input type='text' class='form-control' name='uUsername' id='uUsername' value='".$getFromDb['username']."' readonly>
+                    </div>
+                    $errUsername
+                    <div class='input-group mb-3'>
+                        <div class='input-group-prepend'>
+                            <label class='input-group-text' for='uEmail'>Email</label>
+                        </div>
+                        <input type='text' class='form-control' name='uEmail' id='uEmail' value='".$getFromDb['email']."'>
+                    </div>
+                    $errEmail
+                    <div class='input-group mb-3'>
+                        <div class='input-group-prepend'>
+                            <label class='input-group-text' for='uPassword'>Password</label>
+                        </div>
+                        <input type='password' class='form-control' name='uPassword' id='uPassword'>
+                    </div>
+                    <div class='input-group mb-3'>
+                        <div class='input-group-prepend'>
+                            <label class='input-group-text' for='uConfirmPassword'>Confirm password</label>
+                        </div>
+                        <input type='password' class='form-control' name='uConfirmPassword' id='uConfirmPassword'>
+                    </div>
+                    $errPassword
+                    <div class='custom-control custom-checkbox'>
+                        <input type='checkbox' class='custom-control-input' name='admincp' id='admincp' name='admincp'>
+                        <label class='custom-control-label' for='admincp'>Can access to Administrator Dashboard</label>
+                    </div>
+                    <button class='btn btn-info btn-block'>Edit</button>
+                </form>
+                <button class='btn btn-danger btn-block'>Delete this user</button>
             </div>
         </div>
     </div>
@@ -248,7 +391,7 @@ $('.delete').on('click', function (){
         <div class='row'>
             <div class='col'>
                 <h2 class='text-center'>View all users</h2>
-                ".successTemplate($success)."
+                ".successTemplate($success).errorTemplate($error)."
                 <table class='table'>
                     <thead>
                         <tr>
@@ -272,7 +415,19 @@ $('.delete').on('click', function (){
             echo $htmlAddUser;
             break;
         case 'edit':
-            echo $htmlEditUser;
+            if (!isset($id)) {
+                echo 
+                "<main><div class='alert alert-danger' role='alert'>
+                    You must declare the user id to continue!
+                </div></main>";
+            } elseif ($checkIfFound['count']==0) {
+                echo 
+                "<main><div class='alert alert-danger' role='alert'>
+                    Wrong ID! Please try again!
+                </div></main>";
+            } else {
+                echo $htmlEditUser;
+            }
             break;
         
         default:
@@ -280,5 +435,5 @@ $('.delete').on('click', function (){
             break;
     }
     require_once('themes/default/footer.php');
-    echo $css.$js;
+    echo $css.$js.$js1;
 ?>
