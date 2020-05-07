@@ -23,8 +23,8 @@
         $success = 'Add new user successfully!';
     } elseif ($rdfrom == 'edit') {
         $success = 'Edit user successfully!';
-    } elseif ($rdfrom == 'remove') {
-        $success = 'Remove user successfully!';
+    } elseif ($rdfrom == 'delete') {
+        $success = 'User has been deleted successfully!';
     }
     if ($_GET['delete']==true) {
         $isDelete = $_GET['delete'];
@@ -114,12 +114,12 @@
                     }
                 }
             } elseif ($isDelete) {
-                $db->selectValue('users', "id=$id");
-                $userToDel;
-                $db->deleteFromTable('users', "username=$userToDel");
-                $db->deleteFromTable('users_permision', "username=$userToDel");
-                $success = 'Delete user successfully';
-                header('Location: users.php', true, 303);
+                $resultFDb = mysqli_fetch_assoc($db->selectValue('users', "id=$id",'username'));
+                $userToDel = $resultFDb['username'];
+                $db->deleteFromTable('users', "username='$userToDel'");
+                $db->deleteFromTable('users_permision', "username='$userToDel'");
+                header('Location: users.php?rdfrom=delete', true, 303);
+                die('Delete user successfully');
             }
             break;
     }
@@ -231,7 +231,6 @@
     opacity: 0;
 }
 </style>";
-    $windowLocation = 'window.location.assign(`users.php?type=edit&id=${id}&delete=true`);';
     $js =
 "<script>
 let collapseCol = false;
@@ -250,28 +249,6 @@ let collapseCol = false;
             collapseCol = false;
         break;}
     });
-$('.delete').on('click', function (){
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'You won\'t be able to revert this!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-            if (result.value) {
-                Swal.fire(
-                    'Deleted!',
-                    'User has been deleted.',
-                    'success'
-                )
-                id = $(this).attr('data-id');
-                $windowLocation
-            }
-    })
-});
-
 </script>";
     // template thông báo
     function errorTemplate($error)
@@ -335,10 +312,6 @@ $('.delete').on('click', function (){
         </div>
     </div>
 </main>";
-    $getFromDb['username'];
-    if ($getPermissionFromDb['admincp']=='yes'){
-        $js1 = "<script>$('#admincp').attr('checked','checked');</script>";
-    };
     $htmlEditUser =
 "<main>
     <div class='container'>
@@ -380,7 +353,7 @@ $('.delete').on('click', function (){
                     </div>
                     <button class='btn btn-info btn-block'>Edit</button>
                 </form>
-                <button class='btn btn-danger btn-block'>Delete this user</button>
+                <button class='btn btn-danger btn-block delete'>Delete this user</button>
             </div>
         </div>
     </div>
@@ -392,6 +365,7 @@ $('.delete').on('click', function (){
             <div class='col'>
                 <h2 class='text-center'>View all users</h2>
                 ".successTemplate($success).errorTemplate($error)."
+                <a href='users.php?type=add' class='btn btn-info'>Add new user</a>
                 <table class='table'>
                     <thead>
                         <tr>
@@ -426,14 +400,63 @@ $('.delete').on('click', function (){
                     Wrong ID! Please try again!
                 </div></main>";
             } else {
+                $getFromDb['username'];
+                if ($getPermissionFromDb['admincp']=='yes'){
+                    $js1 = "<script>$('#admincp').attr('checked','checked');</script>";
+                };
+                $windowLocation = "window.location.assign(`users.php?type=edit&id=$id&delete=true`);";
+                $js2 =
+                "<script>$('.delete').on('click', function (){
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You won\'t be able to revert this!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                            if (result.value) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'User has been deleted.',
+                                    'success'
+                                )
+                                $windowLocation
+                            }
+                    })
+                });</script>";
                 echo $htmlEditUser;
             }
             break;
         
         default:
+            $windowLocation = 'window.location.assign(`users.php?type=edit&id=${id}&delete=true`);';
+            $js2 =
+            "<script>$('.delete').on('click', function (){
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You won\'t be able to revert this!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                        if (result.value) {
+                            Swal.fire(
+                                'Deleted!',
+                                'User has been deleted.',
+                                'success'
+                            )
+                            id = $(this).attr('data-id');
+                            $windowLocation
+                        }
+                })
+            });</script>";
             echo $htmlViewUser;
             break;
     }
     require_once('themes/default/footer.php');
-    echo $css.$js.$js1;
+    echo $css.$js.$js1.$js2;
 ?>

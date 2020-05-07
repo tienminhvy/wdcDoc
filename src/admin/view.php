@@ -324,7 +324,7 @@
                 $windowLocation
             }
     })
-});
+    });
 
 </script>";
     
