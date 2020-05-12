@@ -15,14 +15,19 @@
 <?php require_once(__DIR__.'/themes/default/modules/mainMenus.php') ?>
 
 <?php 
+    // lấy số liệu từ db
     $poststotal = mysqli_fetch_assoc($db->selectCol('posts', 'COUNT(*)'));
     $pagestotal = mysqli_fetch_assoc($db->selectCol('pages', 'COUNT(*)'));
     $userstotal = mysqli_fetch_assoc($db->selectCol('users', 'COUNT(*)'));
     $notifyToAdmin = mysqli_fetch_assoc($db->selectValue('settings', "name='notify'", 'value'));
+    // khi phần note chưa chỉnh
     $fnta_set = false;
-    if (isset($_POST['note'])) {
+    if (isset($_POST['note'])) { // khi submit note
+        // lấy giá trị
         $fnotifyToAdmin = $_POST['note'];
+        // chỉnh sửa bảng db
         $db->editValue('settings', "name='notify'", 'value', "'$fnotifyToAdmin'");
+        // đặt giá trị là true, tức là đã chỉnh sửa
         $fnta_set = true;
     }
 ?>

@@ -48,7 +48,7 @@
                 </ul>
             </li>
             <li id="wdc_admin_media"><a href="<?php echo $site_addr.'/underConstruction.php'?>" ><i class="fi-xnsuxl-upload-solid"></i><span>Media</span></a></li>
-            <li id="wdc_admin_theme"><a href="<?php echo $site_addr.'/underConstruction.php'?>" ><i class="fi-xnsuxl-bucket-drip-solid"></i><span>Theme</span></a></li>
+            <li id="wdc_admin_theme"><a href="<?php echo $site_addr.'/admin/themes.php'?>" ><i class="fi-xnsuxl-bucket-drip-solid"></i><span>Theme</span></a></li>
             <li id="wdc_admin_config">
                 <a href="<?php echo $site_addr.'/admin/configurations.php'?>" ><i class="fi-xwluxl-gear-wide"></i><span>Setting</span></a>
             </li>

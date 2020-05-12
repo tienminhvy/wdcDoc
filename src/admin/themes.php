@@ -12,8 +12,8 @@
 ?>
 <?php 
     // lấy dữ liệu từ url
-    $isChangeTheme = $_GET['changeTheme'];
     $fileToOpen = $_GET['file'];
+    $selectedTheme = $_GET['theme'];
     // từ admin sang ổ themes
     chdir('../themes');
     // thu thập danh sách thư mục
@@ -24,23 +24,23 @@
         "<option value='$value'>$value</option>";
     }
     // nếu đổi theme thì
-    if ($isChangeTheme==true) {
-        if (isset($_POST['themeChanger'])){
-            $selectedTheme = $_POST['themeChanger'];
-        } else {
-            $selectedTheme = $dirs[0];
-        }
+    if (isset($_GET['theme'])){
+        $selectedTheme = $_GET['theme'];
     } else {
         $selectedTheme = $dirs[0];
     }
-    chdir($selectedTheme).'<br>';
+    // chuyển sang ổ theme
+    chdir($selectedTheme);
+    // định nghĩa hằng đường dẫn tuyệt đối
     define('ABSOLUTEPATH', getcwd());
+    // quay lại vị trí ban đầu
     chdir('..');
+    // hàm xử lý in cây thư mục và tệp tin
     function getList($dirName, $index = 0)
     {
-        if ($index>0) {
+        if ($index>0) { // vị trí từ 1 trở về sau
             $prefix .= str_repeat('-', $index);
-        } else {
+        } else { // nếu ở vị trí đầu tiên
             $prefix = '';
         }
         chdir("$dirName"); // chuyển ổ sang ổ theme
@@ -52,31 +52,32 @@
             $GLOBALS['getList'] .= "<div class='card-body'>
                     <div class='list-group'>";
                                                                                                                 // mã hoá url
-            $GLOBALS['getList'] .= "<a class='list-group-item list-group-item-action' href='themes.php?file=".urlencode("$relativePath$value")."'>$value</a>";
+            $GLOBALS['getList'] .= "<a class='list-group-item list-group-item-action' href='themes.php?file=".urlencode("$relativePath$value")."&theme=$dirName'>$value</a>";
             $GLOBALS['getList'] .= "</div></div>";
         }
-        ++$index;
+        ++$index; // tăng index
         $dirs = glob('*', GLOB_ONLYDIR); // lấy tất cả directory
         foreach ($dirs as $value) { // lặp
-            getList($value, $index);
+            getList($value, $index); // đệ quy
             chdir('..'); // sau khi đệ quy, quay về ổ đĩa trước
         }
     }
-    getList($selectedTheme);
+    getList($selectedTheme); // thực thi hàm
+    // nếu request mở file hợp lệ
     if (isset($fileToOpen)){
+        // thao tác đọc ghi và đóng file
         $fileForProcess = fopen("$fileToOpen",'r');
         @$fileOpended = fread($fileForProcess, filesize("$fileToOpen"));
         fclose($fileForProcess);
-    } else {
+    } else { // mở file mặc định (info.php)
         $fileForProcess = fopen("info.php",'r');
         @$fileOpended = fread($fileForProcess, filesize("info.php"));
         fclose($fileForProcess);
     }
-    $valFromUser = $_POST['codemirrorValueFromUser'];
-    echo $valFromUser;
-    $fileIsEdited = false;
-    if (isset($valFromUser) && isset($fileToOpen)) {
-        $fileIsEdited = true;
+    $valFromUser = $_POST['codemirrorValueFromUser']; // dữ liệu từ người dùng nhập vào
+    $fileIsEdited = false; // file đã chỉnh sửa mặc định là false
+    if (isset($valFromUser) && isset($fileToOpen)) { // khi user xác nhận file cần chỉnh và đã nhập dữ liệu
+        $fileIsEdited = true; // file đã chỉnh là true
         $fileForProcess = fopen("$fileToOpen",'w+');
         fwrite($fileForProcess, "$valFromUser");
         fclose($fileForProcess);
@@ -142,21 +143,34 @@
             extraKeys: {'Ctrl-Space': 'autocomplete'},
             theme: 'monokai',
         });  
+        let issubmit = false;
         myCodeMirror.setSize('100%', 'auto');
         $('#fileSubmitBtn').on('click', function() {
             $('#textareaCodemirror').html(myCodeMirror.getValue());
-            setTimeout(function(){ $('#editFileForm').submit(); }, 100);
+            $('#editFileForm').submit();
+        });
+        
+        // Form Submit
+        $(document).on('submit', 'form', function(event){
+            // disable unload warning
+            issubmit = true;
+            $(window).off('beforeunload');
         });
         $(`#themeChanger [value='$selectedTheme']`).attr('selected', 'selected');
-        if (myCodeMirror.getValue()!=='') {
-            window.onbeforeunload = function(event) {
-                event.returnValue = 'Exiting..';
-            };
-        }
+        codemirrorValue = myCodeMirror.getValue();
+        setInterval(function(){ 
+            if (myCodeMirror.getValue()!=codemirrorValue&&issubmit==false) {
+                $(window).on('beforeunload', function(){
+                    return 'Any changes will be lost';
+                });
+            } else {
+                $(window).off('beforeunload');
+            }
+        }, 100);
     });
-    </script>";
+        </script>";
     $themeChanger = 
-    "<select name='themeChanger' class='form-control' id='themeChanger'>$themeChangerOption</select>";
+    "<select name='theme' class='form-control' id='themeChanger'>$themeChangerOption</select>";
     $codemirrorPHP =
     "<script src='services/codemirror/lib/codemirror.js'></script>
     <link rel='stylesheet' href='services/codemirror/lib/codemirror.css'>
@@ -194,10 +208,10 @@
                     </form>
                 </div>
                 <div class='col-4'>
-                    <form method='POST' action='themes.php?changeTheme=true'>
+                    <form method='GET' id='changeTheme'>
                         <h5>Change theme</h5>
                         $themeChanger
-                        <button class='btn btn-info btn-block'>Submit</button>
+                        <div class='btn btn-info btn-block' id='btnChangeTheme'>Submit</div>
                     </form>
                     $getList
                 </div>
