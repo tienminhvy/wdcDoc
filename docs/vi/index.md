@@ -3,6 +3,7 @@
 
 ---
 
+<p><a href="https://github.tienminhvy.com/wdcDoc">&lt;&lt; Quay về trang chủ</a></p>
 <h2 id="chào-mừng-bạn-đến-với-mã-nguồn-viết-tài-liệu-đơn-giản-nhất-cùng-wdcdoc">Chào mừng bạn đến với mã nguồn viết tài liệu đơn giản nhất cùng wdcDoc</h2>
 <ul>
 <li>Bạn muốn có một nơi chỉ dành để viết tài liệu cho nhân viên, người dùng của công ty bạn?</li>
