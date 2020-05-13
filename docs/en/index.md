@@ -33,5 +33,5 @@
 <h2 id="question">Question</h2>
 <p>If you have any questions, you can contact us at the <strong>Support</strong> section above.</p>
 <h2 id="note">Note</h2>
-<p>** May 13, 2020 ** - Create new documentation for source code.</p>
+<p><strong>May 13, 2020</strong> - Create new documentation for source code.</p>
 
