@@ -3,7 +3,7 @@
 
 ---
 
-<p>[&lt;&lt; Back to home page] (<a href="https://github.tienminhvy.com/wdcDoc">https://github.tienminhvy.com/wdcDoc</a>)</p>
+<p><a href="https://github.tienminhvy.com/wdcDoc">&lt;&lt; Back to home page</a></p>
 <h2 id="welcome-to-the-simplest-documentation-source-with-wdcdoc">Welcome to the simplest documentation source with wdcDoc</h2>
 <ul>
 <li>You want a place just for writing documents for employees, users of your company?</li>
