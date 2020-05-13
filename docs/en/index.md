@@ -12,7 +12,7 @@
 </ul>
 <p>Then you’ve chosen the right place! Introducing to you, this open source suite is completely free for individuals and businesses , it was built and perfected by the weDevCode Team.</p>
 <h2 id="about-the-source-code-wdcdoc">About the source code wdcDoc</h2>
-<p>This is the most favorite source code for the team, because the amount of time and effort was put into it is really huge and we decided to publish the source code to support small businesses and individuals who are unable to finance to use the paid source code.</p>
+<p>This is the most favorite source code of our team, because the amount of time and effort was put into it really huge and we decided to publish the source code to support small businesses and individuals who are unable to finance to use another paid source code.</p>
 <p>If you plan to contribute to this source code, you can scroll to the <strong>Contribute</strong> section for more information.</p>
 <h2 id="what-in-the-wdcdoc-source-code">What in the wdcDoc source code?</h2>
 <ol>
