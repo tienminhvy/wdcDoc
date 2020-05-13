@@ -32,6 +32,6 @@
 <p>Bạn có thể đóng góp trực tiếp cho dự án này bằng việc gia nhập vào dự án này và cùng team xây dựng dự án. Lời yêu cầu tham gia từ  bạn sẽ được nhóm chào đón nồng nhiệt &lt;3.</p>
 <h2 id="câu-hỏi">Câu hỏi</h2>
 <p>Nếu bạn có những câu hỏi nào, bạn có thể liên hệ ở phần Hỗ trợ ở trên nhé.</p>
-<h2 id="changelog">Changelog</h2>
+<h2 id="ghi-chú">Ghi chú</h2>
 <p><strong>13/05/2020</strong> - Tạo mới phần tài liệu cho mã nguồn.</p>
 
