@@ -237,9 +237,6 @@ $createOn =
 <input type='number' name='year' id='wdc_eyear' min='0' max='9999' value='$fyear'>
 <br />
 <span>at </span><input type='number' name='hour' id='wdc_ehour' min='0' max='23' value='$fhour'><span>:</span><input type='number' name='minute' id='wdc_emin' min='0' max='59' value='$fminute'><span>:</span><input type='number' name='second' id='wdc_esec' min='0' max='59' value='$fsecond'>";
-    $css = 
-"<style>
-</style>";
     $js = '<script>'.selectMonth($fmonth);
     $js .= "let collapseCol = false;
     $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
@@ -247,13 +244,11 @@ $createOn =
         switch (collapseCol) {
             case false:
             $('#wdc_admin_create > ul').removeClass('wdc_submenu_01');
-            $('#wdc_admin_create > ul').addClass('wdc_submenu_01_collapsed');
             collapseCol = true;
             break;
 
             default:
             $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
-            $('#wdc_admin_create > ul').removeClass('wdc_submenu_01_collapsed');
             collapseCol = false;
         break;}
     });
@@ -413,4 +408,4 @@ $categoryDoNotDelete =
     }
 ?>
 
-<?php require_once(__DIR__.'/themes/default/footer.php');echo $css.$js?>
+<?php require_once(__DIR__.'/themes/default/footer.php');echo $js?>

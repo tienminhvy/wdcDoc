@@ -229,7 +229,7 @@
                 break;
             
             default: // nếu ko
-                $html = "<h1>Welcome to the most simple Document Software</h1>
+                $html = "<h1>Welcome to the simplest Document Software</h1>
                 <p>This script will help you to install the wdcDoc</p>
                 <p>What are you waiting for? Press Next to start the installation now.</p>
                 <p class='note'>This installation script only work well on PC/Laptop</p>

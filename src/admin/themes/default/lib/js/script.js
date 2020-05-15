@@ -22,6 +22,7 @@ $(function () {
         switch (collapseCol) {
             case false:
             $('#wdc_ad_nav2').addClass('wdc_ad_nav2_collapsedMenu');
+            $('#wdc_ad_nav2>ul>li>ul').addClass('collapsedSubMenu_01');
             $('#wdc_collapseActivate #wdc_collapseActivateIcon > svg').css('transform', 'rotateZ(180deg)');
             $('main').animate({left: '45px'},'fast');
             $('main').width(windowWidth-45);
@@ -30,6 +31,7 @@ $(function () {
             
             default:
             $('#wdc_ad_nav2').removeClass('wdc_ad_nav2_collapsedMenu');
+            $('#wdc_ad_nav2>ul>li>ul').removeClass('collapsedSubMenu_01');
             $('#wdc_collapseActivate #wdc_collapseActivateIcon > svg').css('transform', 'rotateZ(0)');
             $('main').animate({left: '200px'},'fast');
             $('main').width(windowWidth-wdc_ad_nav2_width);

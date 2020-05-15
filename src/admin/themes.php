@@ -13,6 +13,13 @@
 <?php 
     // lấy dữ liệu từ url
     $fileToOpen = $_GET['file'];
+    // Xử lý đầu vào, tránh vấn đề bảo mật
+    $fileToOpen = str_replace('http://', '', $fileToOpen);
+    $fileToOpen = str_replace('https://', '', $fileToOpen);
+    $fileToOpen = str_replace('HTTP://', '', $fileToOpen);
+    $fileToOpen = str_replace('HTTPS://', '', $fileToOpen);
+    $fileToOpen = str_replace('://', '', $fileToOpen);
+    $fileToOpen = str_replace('//', '', $fileToOpen);
     $selectedTheme = $_GET['theme'];
     // từ admin sang ổ themes
     chdir('../themes');
@@ -25,7 +32,19 @@
     }
     // nếu đổi theme thì
     if (isset($_GET['theme'])){
-        $selectedTheme = $_GET['theme'];
+        foreach ($dirs as $value) {
+            if ($value==$_GET['theme']) {
+                $isThemeFound = true;
+                break;
+            } else {
+                $isThemeFound = false;
+            }
+        }
+        if ($isThemeFound) {
+            $selectedTheme = $_GET['theme'];
+        } else {
+            $selectedTheme = $dirs[0];
+        }
     } else {
         $selectedTheme = $dirs[0];
     }
@@ -66,62 +85,113 @@
     // nếu request mở file hợp lệ
     if (isset($fileToOpen)){
         // thao tác đọc ghi và đóng file
-        $fileForProcess = fopen("$fileToOpen",'r');
-        @$fileOpended = fread($fileForProcess, filesize("$fileToOpen"));
-        fclose($fileForProcess);
+        @$fileForProcess = fopen("$fileToOpen",'r');
+        if (!$fileForProcess) {
+            $notify = "Cannot open the specify file, file not found!";
+            $requestReturn = 'error';
+            $fileNotFound = true;
+        } else {
+            @$fileOpended = fread($fileForProcess, filesize("$fileToOpen"));
+            fclose($fileForProcess);
+            $fileNotFound = false;
+        }
     } else { // mở file mặc định (info.php)
-        $fileForProcess = fopen("info.php",'r');
-        @$fileOpended = fread($fileForProcess, filesize("info.php"));
-        fclose($fileForProcess);
+        @$fileForProcess = fopen("info.php",'r');
+        if (!$fileForProcess) {
+            $notify = "Cannot open the specify file, file not found!";
+            $requestReturn = 'error';
+            $fileNotFound = true;
+        } else {
+            @$fileOpended = fread($fileForProcess, filesize("info.php"));
+            fclose($fileForProcess);
+            $fileNotFound = false;
+        }
     }
     $valFromUser = $_POST['codemirrorValueFromUser']; // dữ liệu từ người dùng nhập vào
     $fileIsEdited = false; // file đã chỉnh sửa mặc định là false
-    if (isset($valFromUser) && isset($fileToOpen)) { // khi user xác nhận file cần chỉnh và đã nhập dữ liệu
+    if (isset($valFromUser) && isset($fileToOpen) && $fileNotFound == false) { // khi user xác nhận file cần chỉnh và đã nhập dữ liệu
         $fileIsEdited = true; // file đã chỉnh là true
         $fileForProcess = fopen("$fileToOpen",'w+');
         fwrite($fileForProcess, "$valFromUser");
         fclose($fileForProcess);
-        $success = "Edit file successfully";
-    } elseif (isset($valFromUser)) {
+        // thông báo thành công
+        $notify = "Edit file successfully";
+        $requestReturn = 'success';
+    } elseif (isset($valFromUser) && $fileNotFound == false) { // hoặc user đã chỉnh sửa file mặc định
         $fileIsEdited = true;
         $fileForProcess = fopen("info.php",'w+');
         fwrite($fileForProcess, "$valFromUser");
         fclose($fileForProcess);
-        $success = "Edit file successfully";
+        $notify = "Edit file successfully";
+        $requestReturn = 'success';
     }
-    if ($fileIsEdited) {
-        $fileOpended = $valFromUser;
+    if ($fileIsEdited) { // nếu file đã chỉnh sửa
+        $fileOpended = $valFromUser; // lấy dữ liệu từ user
     }
-    $file_parts = pathinfo("$fileToOpen");
+    $file_parts = pathinfo("$fileToOpen"); // lấy thông tin của file đang mở
 
     switch($file_parts['extension'])
-    {
-        case "css":
+    { // mode của codemirror
+        case "css": // trường hợp là file css
             $codemirrorMode = 'text/css';
         break;
 
-        case "js":
+        case "js": // trường hợp file js
             $codemirrorMode = 'text/javascript';
         break;
 
-        default:
+        default: // còn lại
             $codemirrorMode = 'application/x-httpd-php';
         break;
     }
-    if (isset($fileToOpen)) {
-        $checkToActive = "$fileToOpen";
-    } else {
-        $fileToOpen = 'info.php';
-    }
+    // tính năng thử nghiệm
+    // if (isset($fileToOpen)) { // nếu user xác định file cần mở
+    //     $checkToActive = "$fileToOpen";
+    // } else {
+    //     $fileToOpen = 'info.php';
+    // }
     
 ?>
 <?php 
-    function successTemplate($success)
+    function notifyTemplate($notify, $type='')
     {
-        if (isset($success)) {
-            return "<div class='alert alert-success' role='alert'>$success</div>";
+        if (isset($notify)) {
+            switch ($type) {
+                case 'success':
+                    return "<div class='alert alert-success' role='alert'>$notify</div>";
+                    break;
+
+                case 'error':
+                    return "<div class='alert alert-danger' role='alert'>$notify</div>";
+                    break;
+
+                case 'warning':
+                    return "<div class='alert alert-warning' role='alert'>$notify</div>";
+                    break;
+                
+                default:
+                    return "<div class='alert alert-primary' role='alert'>$notify</div>";
+                    break;
+            }
         }
         return;
+    }
+    switch ($requestReturn) {
+        case 'success':
+            $notifyMsg = notifyTemplate($notify, 'success');
+            break;
+
+        case 'error':
+            $notifyMsg = notifyTemplate($notify, 'error');
+            break;
+
+        case 'warning':
+            $notifyMsg = notifyTemplate($notify, 'warning');
+            break;
+        
+        default:
+            $notifyMsg = notifyTemplate($notify);
+            break;
     }
     $css =
     "<style>
@@ -200,7 +270,7 @@
                         before saving the content. This software currently do not support the 
                         PHP Complier features.
                     </div>
-                    ".successTemplate($success)."
+                    $notifyMsg
                     <form method='POST' id='editFileForm'>
                         <div id='codemirror'></div>
                         <textarea id='textareaCodemirror' name='codemirrorValueFromUser'></textarea>
@@ -211,7 +281,7 @@
                     <form method='GET' id='changeTheme'>
                         <h5>Change theme</h5>
                         $themeChanger
-                        <div class='btn btn-info btn-block' id='btnChangeTheme'>Submit</div>
+                        <button class='btn btn-info btn-block' id='btnChangeTheme'>Submit</button>
                     </form>
                     $getList
                 </div>

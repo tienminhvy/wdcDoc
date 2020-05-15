@@ -192,13 +192,11 @@ $createOn =
         switch (collapseCol) {
             case false:
             $('#wdc_admin_create > ul').removeClass('wdc_submenu_01');
-            $('#wdc_admin_create > ul').addClass('wdc_submenu_01_collapsed');
             collapseCol = true;
             break;
 
             default:
             $('#wdc_admin_create > ul').addClass('wdc_submenu_01');
-            $('#wdc_admin_create > ul').removeClass('wdc_submenu_01_collapsed');
             collapseCol = false;
         break;}
     });

@@ -5,11 +5,12 @@
 
     class userChecking
     {
-        public function __construct($username, $email, $password)
+        public function __construct($username, $email, $password, $url)
         { // hàm khởi tạo ban đầu
             $this->username = $username;
             $this->email = $email;
             $this->password = $password;
+            $this->url = $url;
         }
         
         public function checkUsername()
@@ -44,6 +45,17 @@
                 return false;
             } elseif (strlen($this->password) > 50) {
                 $GLOBALS['errPassword'] = '<b>Password must be less than 50 characters</b>';
+                return false;
+            } else {return true;}
+        }
+
+        public function checkURL()
+        { // kiểm tra mật khẩu
+            if ($this->url == '') {
+                $GLOBALS['errURL'] = '<b>URL must be fill out!</b>';
+                return false;
+            } elseif (!filter_var($this->url, FILTER_VALIDATE_URL)) {
+                $GLOBALS['errURL'] = '<b>Invalid URL</b>';
                 return false;
             } else {return true;}
         }
