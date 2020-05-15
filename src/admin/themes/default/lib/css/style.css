@@ -139,7 +139,8 @@ span {
     position: relative;
 }
 #wdc_ad_nav2 > ul > li > a{
-    height: 49px;
+    word-break: break-all;
+    min-height: 49px;
 }
 
 #wdc_ad_nav2 > ul > li > ul {
@@ -167,7 +168,8 @@ span {
     font-size: 15px;
     padding: 15px;
     padding-left: 40px;
-    height: 50px;
+    min-height: 50px;
+    word-break: break-all;
 }
 
 .wdc_ad_nav2_collapsedMenu {

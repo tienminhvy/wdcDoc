@@ -14,12 +14,14 @@
     // lấy dữ liệu từ url
     $fileToOpen = $_GET['file'];
     // Xử lý đầu vào, tránh vấn đề bảo mật
-    $fileToOpen = str_replace('http://', '', $fileToOpen);
-    $fileToOpen = str_replace('https://', '', $fileToOpen);
-    $fileToOpen = str_replace('HTTP://', '', $fileToOpen);
-    $fileToOpen = str_replace('HTTPS://', '', $fileToOpen);
-    $fileToOpen = str_replace('://', '', $fileToOpen);
-    $fileToOpen = str_replace('//', '', $fileToOpen);
+    if (isset($fileToOpen)) {
+        $fileToOpen = str_replace('http://', '', $fileToOpen);
+        $fileToOpen = str_replace('https://', '', $fileToOpen);
+        $fileToOpen = str_replace('HTTP://', '', $fileToOpen);
+        $fileToOpen = str_replace('HTTPS://', '', $fileToOpen);
+        $fileToOpen = str_replace('://', '', $fileToOpen);
+        $fileToOpen = str_replace('//', '', $fileToOpen);
+    }
     $selectedTheme = $_GET['theme'];
     // từ admin sang ổ themes
     chdir('../themes');

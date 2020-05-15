@@ -10,6 +10,6 @@ $db_username = 'admin';
 $db_password = 'admin';
 $db_port = 3306;
 $site_addr = 'http://localhost/wdcDocSoftware';
-$sitename = 'wdcDo';
+$sitename = 'wdcDoc';
 $site_email = 'doc@localhost.com';
 $installed = true;
